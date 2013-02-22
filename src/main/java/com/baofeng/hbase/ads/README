@@ -1,0 +1,13 @@
+属性库支持广告项目
+
+command:
+#dump data from mysql
+1. sudo  python /opt/hadoopbusiness/ComETL2/ComEtl.py -c attribute_ads_adid_tagid_dump_v1.0 -d True -t 20130214
+
+#生成uid-tag对应表，并且批量插入hbase
+1. sudo  python /opt/hadoopbusiness/ComETL2/ComEtl.py -c attribute_ads_tag_v1.0 -d True -t 20130214 -j job1
+2. sudo  python /opt/hadoopbusiness/ComETL2/ComEtl.py -c attribute_ads_tag_v1.0 -d True -t 20130214 -j job2
+
+
+#生成最后推荐结果
+/opt/modules/hadoop/hadoop-1.0.3/bin/hadoop jar /opt/hadoopbusiness/ComETL2/mapred/hbase-bulk-import-0.1.jar com.baofeng.hbase.ads.recom.Main -i user_behavior_attribute_noregistered -c attr:adtagid -o /data/dw/attribute_ads/uid_adids -m /data/dw/attribute_ads/adid_tagid_mapping_online || -input /tmp/test -output /data/dw/attribute_ads/uid_adids
