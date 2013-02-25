@@ -49,8 +49,10 @@ public class HBaseManager extends Thread {
 				"hbase.zookeeper.quorum",
 				cp.getProperty(ConfigProperties.CONFIG_NAME_HBASE_ZOOKEEPER_QUORUM));
 		try {
+//			table = new HTable(config,
+//					Bytes.toBytes("user_behavior_attribute_noregistered"));
 			table = new HTable(config,
-					Bytes.toBytes("user_behavior_attribute_noregistered"));
+					Bytes.toBytes("demo_table"));
 			admin = new HBaseAdmin(config);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -88,18 +90,19 @@ public class HBaseManager extends Thread {
 	}
 
 	public static void main(String[] args) throws Exception {
-//		HBaseManager m = new HBaseManager();
+		HBaseManager m = new HBaseManager();
 		// m.testScanner();
 		// m.put();
-		// m.testGet();
+		 m.testGet();
 		// m.testScanGet();
 //		m.testPageFilter();
 		System.out.println("-------------------------------");
 //		m.testColumnPaginationFilter();
-		Put put = new Put(Bytes.toBytes("{1F591795-74DE-EB70-0245-0E4465C72CFA}"));
-		put.add(Bytes.toBytes("bhvr"), Bytes.toBytes("vvmid"),
-				Bytes.toBytes(123111));
-		System.out.println(put.toJSON());
+//		Put put = new Put(Bytes.toBytes("{1F591795-74DE-EB70-0245-0E4465C72CFA}"));
+//		put.add(Bytes.toBytes("bhvr"), Bytes.toBytes("vvmid"),
+//				Bytes.toBytes(123111));
+//		System.out.println(put.toJSON());
+
 		
 	}
 
@@ -357,20 +360,20 @@ public class HBaseManager extends Thread {
 	public void testGet() throws IOException {
 		long st = System.currentTimeMillis();
 		Get get = new Get(
-				Bytes.toBytes("{1F591795-74DE-EB70-0245-0E4465C72CFA}"));
-		get.addColumn(Bytes.toBytes("bhvr"), Bytes.toBytes("vvmid"));
+				Bytes.toBytes("i2"));
+		get.addColumn(Bytes.toBytes("msg"), Bytes.toBytes("title"));
 		get.setMaxVersions(100);
 		// get.setTimeRange(1354010844711L - 12000L, 1354010844711L);
 
-		// get.setTimeStamp(1354700700000L);
+		get.setTimeStamp(3L);
 
-		Filter filter = new ColumnPaginationFilter(1, 10);
-		get.setFilter(filter);
+//		Filter filter = new ColumnPaginationFilter(1, 10);
+//		get.setFilter(filter);
 
 		Result dbResult = table.get(get);
 
 		System.out.println("result=" + dbResult.toString());
-
+		System.out.println("result=" + dbResult.list().get(0).getTimestamp());
 		long en2 = System.currentTimeMillis();
 		System.out.println("Total Time: " + (en2 - st) + " ms");
 

@@ -33,15 +33,16 @@ import org.apache.thrift.transport.TTransportException;
 public class EasyDemoClient {
 
 	static protected int port = 9090;
-	static protected String host = "114.112.82.61";
+	static protected String host = "114.112.82.20";
 	CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
 
-	ByteBuffer table = ByteBuffer
-			.wrap(bytes("user_behavior_attribute_noregistered"));
-	// ByteBuffer table = ByteBuffer.wrap(bytes("demo_test"));
-	ByteBuffer columns = ByteBuffer.wrap(bytes("attr:movt"));
-	// ByteBuffer row = ByteBuffer.wrap(bytes("row1"));
-	ByteBuffer row = ByteBuffer.wrap(bytes("Log_EXPRESS"));
+	// ByteBuffer table = ByteBuffer
+	// .wrap(bytes("user_behavior_attribute_noregistered"));
+	ByteBuffer table = ByteBuffer.wrap(bytes("demo_table"));
+	ByteBuffer columns = ByteBuffer.wrap(bytes("msg:text"));
+	ByteBuffer row = ByteBuffer.wrap(bytes("i2"));
+
+	// ByteBuffer row = ByteBuffer.wrap(bytes("2"));
 
 	EasyDemoClient() {
 	}
@@ -95,10 +96,14 @@ public class EasyDemoClient {
 		// columns, 1000, null);
 		List<ByteBuffer> cols = new ArrayList<ByteBuffer>();
 		cols.add(columns);
+		cols.add(ByteBuffer.wrap(bytes("msg:status")));
+		cols.add(ByteBuffer.wrap(bytes("msg:title")));
 		List<TRowResult> list = client
 				.getRowWithColumns(table, row, cols, null);
-		// System.out.println(list);
-		printRow(list);
+//		list = clijent.getRow(table, row, null);
+		List<TCell> cells = client.getVerTs(table, row, ByteBuffer.wrap(bytes("msg:title")), 3L, 1, null);
+		System.out.println(cells);
+//		printRow(list);
 		transport.close();
 	}
 

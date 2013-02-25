@@ -1,6 +1,29 @@
-广告指数-计算人群属性
+1. 广告指数-计算人群属性
 
 数据输入：
 广告点击日志
 或
 vv日志
+
+通过mname join
+
+step1：
+分布人群属性数据、广告/物料数据
+通过mname join
+
+step2：
+聚合人群属性值
+
+
+2. 广告指数-预测用户属性  user包
+
+step1：
+通过aid，wid，type join
+获取uid mname
+
+step2：
+分布人群属性数据、广告/物料数据
+通过mname join
+
+step3：
+聚合人群属性值
