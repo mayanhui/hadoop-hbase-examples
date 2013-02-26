@@ -1,13 +1,5 @@
 package com.baofeng.advindex.user;
 
-// /data/dm/baofengindex/crowd_attrs/bf_index_vv_play_album_crowd_attrs.txt
-
-// /data/dm/advindex/adv_hour_movie/
-///data/dm/advindex/adv_hour_movie/20130101/00
-
-// /data/dm/advindex/material_hour_movie
-// /data/dm/advindex/material_hour_movie/20130101/00
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -38,8 +30,6 @@ import com.baofeng.advindex.AggrReducer;
 import com.baofeng.util.DateFormatUtil;
 import com.hadoop.mapreduce.LzoTextInputFormat;
 
-//import java.io.File;
-
 /**
  * User attribute forecast main class.
  * 
@@ -52,6 +42,7 @@ public class UserAttributeForecastMain {
 	public static final String NAME = "Crowd-Attribute";
 	public static final String TMP_FILE_PATH = "/tmp/advindex_user_attr_forecast";
 	public static final String CROWD_ATTR_MAPPING = "/data/dm/baofengindex/crowd_attrs/bf_index_vv_play_album_crowd_attrs.txt";
+	public static final int NUM_REDUCE = 10;
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
@@ -79,15 +70,6 @@ public class UserAttributeForecastMain {
 		if (!date.matches("\\d+")) {
 			throw new Exception("Input field 'data' should be '20130101'");
 		}
-
-		// if (null == hour || hour.length() <= 0) {
-		// hour = DateFormatUtil.getLastHour();
-		// }
-		//
-		// if (output.endsWith(java.io.File.separator)) {
-		// output = output + date;
-		// } else
-		// output = output + java.io.File.separator + date;
 
 		FileSystem fs = FileSystem.get(conf);
 		Path outputPath = new Path(output);
@@ -122,6 +104,7 @@ public class UserAttributeForecastMain {
 		job.setJarByClass(UserAttributeForecastMain.class);
 		job.setMapperClass(VVMnameMappingMapper.class);
 		job.setReducerClass(VVMnameMappingReducer.class);
+		job.setNumReduceTasks(NUM_REDUCE);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
 		job.setInputFormatClass(LzoTextInputFormat.class);
@@ -167,7 +150,6 @@ public class UserAttributeForecastMain {
 
 			success = job.waitForCompletion(true) ? 0 : 1;
 		}
-
 	}
 
 	private static String generateMonthInput(String input, String date) {
@@ -190,28 +172,6 @@ public class UserAttributeForecastMain {
 		return sdf.format(date.getTime());
 	}
 
-	// private static String generateHourDataInput(String input, String date,
-	// String hour) {
-	// String rst = null;
-	// if (null != input && null != date && null != hour) {
-	// if (input.endsWith(File.separator)) {
-	// input = input.substring(0, input.length() - 1);
-	// }
-	// rst = input + java.io.File.separator + date
-	// + java.io.File.separator + "00";
-	// int h = Integer.parseInt(hour);
-	// for (int i = 1; i < h; i++) {
-	// if (i < 10) {
-	// rst = rst + "," + input + java.io.File.separator + date
-	// + java.io.File.separator + "0" + i;
-	// } else
-	// rst = rst + "," + input + java.io.File.separator + date
-	// + java.io.File.separator + i;
-	// }
-	// }
-	// return rst;
-	// }
-
 	private static CommandLine parseArgs(String[] args) throws ParseException {
 		Options options = new Options();
 		Option o = new Option("i", "input", true,
@@ -230,11 +190,6 @@ public class UserAttributeForecastMain {
 		o.setArgName("date");
 		o.setRequired(false);
 		options.addOption(o);
-
-		// o = new Option("h", "hour", true, "hour, such as 01");
-		// o.setArgName("hour");
-		// o.setRequired(false);
-		// options.addOption(o);
 
 		o = new Option("jobconf", "jobconf", true, "jobconf");
 		o.setArgName("jobconf");
