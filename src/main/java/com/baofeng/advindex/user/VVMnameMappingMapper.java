@@ -42,24 +42,20 @@ public class VVMnameMappingMapper extends
 
 		String mname = null;
 
-		String arr[] = valueStr.split("\t", -1);
-		if (arr.length == 31) {// vv 31 fields
+		String[] arr = valueStr.split("\t", -1);
+		if (arr.length == 32) {// vv 31 fields
 			uid = arr[6].trim();
-
 			aid = arr[8].trim();
 			wid = arr[9].trim();
 			type = arr[11].trim();
-
-			if (null != type && type.trim().equals("2")) {// 成功vv
-
+			if (null != type && type.equals("2")) {// 成功vv
 				if (null != aid && null != wid && null != uid
-						&& aid.trim().length() > 0 && wid.trim().length() > 0
-						&& uid.trim().length() > 0) {
+						&& aid.length() > 0 && wid.length() > 0
+						&& uid.length() > 0) {
 					k.set(aid + "\t" + wid);
 					v.set(Const.ID_PREDIX + uid);
 					context.write(k, v);
-					context.getCounter("advindex-job1", "advindex_vv")
-							.increment(1);
+					context.getCounter("advindex-job1", "advindex_vv").increment(1);
 				}
 			}
 		} else if (arr.length == 1) { // mapping separator ,

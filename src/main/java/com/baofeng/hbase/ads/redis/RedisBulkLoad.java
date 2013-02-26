@@ -31,8 +31,8 @@ public class RedisBulkLoad {
 	public static final String NAME = "Redis-Bulk-Load";
 	public static final String LOCAL_DIR = "/tmp/attribute_ads";
 
-//	public static final String REDIS_HOST = "192.168.1.111";
-	public static final String REDIS_HOST = "192.168.85.210";
+	public static final String REDIS_HOST = "192.168.1.111";
+//	public static final String REDIS_HOST = "192.168.85.210";
 
 	public static List<String> hashFields = new ArrayList<String>();
 	static {

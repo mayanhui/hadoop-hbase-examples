@@ -1,13 +1,20 @@
 package com.baofeng;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
-import com.baofeng.util.DateFormatUtil;
+import com.baofeng.advindex.Const;
+
+//import com.baofeng.util.DateFormatUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -47,12 +54,36 @@ public class Test {
 		pool.destroy();
 	}
 
-	public static void main(String[] args) {
-		String input = generateMonthInput("/data/dw/vv", "20130224");
-		System.out.println(input);
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				new FileInputStream("/root/vv.txt")));
+		String line = null;
+		while (null != (line = br.readLine())) {
+			String[] arr = line.split("\t", -1);
+			String uid = null;
+			String type = null;
 
-		input = getDateByDay("20130224",30);
-		System.out.println(input);
+			String aid = null;
+			String wid = null;
+
+			String mname = null;
+			if (arr.length == 31) {// vv 31 fields
+				uid = arr[6].trim();
+
+				aid = arr[8].trim();
+				wid = arr[9].trim();
+				type = arr[11].trim();
+
+				if (null != type && type.equals("2")) {// 成功vv
+					if (null != aid && null != wid && null != uid
+							&& aid.length() > 0 && wid.length() > 0
+							&& uid.length() > 0) {
+						System.out.println(uid + "|" + aid + "|" + wid + "|" + type);
+					}
+				}
+			}
+		}
+		br.close();
 	}
 
 	private static String generateMonthInput(String input, String date) {
