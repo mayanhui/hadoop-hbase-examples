@@ -27,7 +27,7 @@ public class BulkImportMain extends Configured implements Tool {
 	static final Log LOG = LogFactory.getLog(BulkImportMain.class);
 
 	ConfigProperties config = ConfigFactory.getInstance().getConfigProperties(
-			ConfigFactory.BULK_IMPORT_CONFIG_PATH);
+			ConfigFactory.APP_CONFIG_PATH);
 
 	@Override
 	public int run(String[] args) throws Exception {
@@ -48,7 +48,7 @@ public class BulkImportMain extends Configured implements Tool {
 		conf.set(
 				ConfigProperties.CONFIG_NAME_HBASE_ZOOKEEPER_QUORUM,
 				config.getProperty(ConfigProperties.CONFIG_NAME_HBASE_ZOOKEEPER_QUORUM));
-//		conf.set("mapred.job.queue.name", "ETL");
+		// conf.set("mapred.job.queue.name", "ETL");
 
 		Job job = new Job(conf, "Import from file " + input + " into table "
 				+ table);

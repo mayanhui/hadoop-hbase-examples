@@ -21,7 +21,7 @@ public class HBaseScanUtil {
 	public static HTable table;
 	public static HBaseAdmin admin;
 	public static ConfigProperties cp = ConfigFactory.getInstance()
-			.getConfigProperties(ConfigFactory.BULK_IMPORT_CONFIG_PATH);
+			.getConfigProperties(ConfigFactory.APP_CONFIG_PATH);
 
 	static {
 		config = HBaseConfiguration.create();

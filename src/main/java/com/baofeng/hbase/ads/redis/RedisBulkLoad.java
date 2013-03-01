@@ -21,6 +21,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.util.GenericOptionsParser;
 
+import com.baofeng.util.ConfigFactory;
+import com.baofeng.util.ConfigProperties;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -31,14 +34,20 @@ public class RedisBulkLoad {
 	public static final String NAME = "Redis-Bulk-Load";
 	public static final String LOCAL_DIR = "/tmp/attribute_ads";
 
-	public static final String REDIS_HOST = "192.168.1.111";
-//	public static final String REDIS_HOST = "192.168.85.210";
+	public static String host;
+	public static int port;
 
-	public static List<String> hashFields = new ArrayList<String>();
+	static ConfigProperties config = ConfigFactory.getInstance()
+			.getConfigProperties(ConfigFactory.APP_CONFIG_PATH);
+	static List<String> hashFields = new ArrayList<String>();
+	
 	static {
 		hashFields.add("adidlist");
 		hashFields.add("attr_gender");
 		hashFields.add("attr_age");
+
+		host = config.getProperty("redis.host");
+		port = config.getInt("redis.port", 6379);
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -54,26 +63,25 @@ public class RedisBulkLoad {
 			return;
 		}
 
-//		FileSystem fs = FileSystem.get(conf);
-//		Path inputPath = new Path(input);
-//		if (!fs.exists(inputPath)) {
-//			LOG.info("Input path is not exist!");
-//			return;
-//		}
-//
-//		fs.copyToLocalFile(inputPath, new Path(LOCAL_DIR));
+		FileSystem fs = FileSystem.get(conf);
+		Path inputPath = new Path(input);
+		if (!fs.exists(inputPath)) {
+			LOG.info("Input path is not exist!");
+			return;
+		}
+
+		fs.copyToLocalFile(inputPath, new Path(LOCAL_DIR));
 
 		long st = System.currentTimeMillis();
 		JedisPoolConfig config = new JedisPoolConfig();
 		config.setMaxActive(1000);
 		config.setMaxIdle(20);
-		JedisPool pool = new JedisPool(config, REDIS_HOST, 6379, 20000);
-//		JedisPool pool = new JedisPool(new JedisPoolConfig(), REDIS_HOST);
+		JedisPool pool = new JedisPool(config, host, port, 20000);
 		Jedis jedis = pool.getResource();
-//		BufferedReader br = new BufferedReader(new InputStreamReader(
-//				new FileInputStream(LOCAL_DIR)));
 		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new FileInputStream(input)));
+				new FileInputStream(LOCAL_DIR)));
+		// BufferedReader br = new BufferedReader(new InputStreamReader(
+		// new FileInputStream(input)));
 		String line = null;
 		int count = 0;
 		while (null != (line = br.readLine())) {
@@ -86,9 +94,9 @@ public class RedisBulkLoad {
 
 				try {
 					jedis.hset(uid, field, adidOrAttr);
-				} catch(Exception e){
+				} catch (Exception e) {
 					continue;
-				}finally {
+				} finally {
 					pool.returnResource(jedis);
 				}
 			}
@@ -100,9 +108,8 @@ public class RedisBulkLoad {
 		long en = System.currentTimeMillis();
 		System.out.println("count: " + count);
 		System.out.println("time: " + (en - st));
-		System.out.println("AVG time: " + (en - st)/(double)count + "ms");
-		
-		
+		System.out.println("AVG time: " + (en - st) / (double) count + "ms");
+
 		pool.destroy();
 		br.close();
 	}

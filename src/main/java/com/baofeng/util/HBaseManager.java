@@ -38,7 +38,7 @@ public class HBaseManager extends Thread {
 	public HBaseAdmin admin;
 
 	ConfigProperties cp = ConfigFactory.getInstance().getConfigProperties(
-			ConfigFactory.BULK_IMPORT_CONFIG_PATH);
+			ConfigFactory.APP_CONFIG_PATH);
 
 	public HBaseManager() {
 		config = HBaseConfiguration.create();

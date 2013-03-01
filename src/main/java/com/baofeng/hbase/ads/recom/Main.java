@@ -40,7 +40,7 @@ public class Main {
 	public static final String OUPUT_COLUMN = "attr:adid";
 
 	static ConfigProperties config = ConfigFactory.getInstance()
-			.getConfigProperties(ConfigFactory.BULK_IMPORT_CONFIG_PATH);
+			.getConfigProperties(ConfigFactory.APP_CONFIG_PATH);
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = HBaseConfiguration.create();

@@ -28,7 +28,7 @@ public class BulkImportMain extends Configured implements Tool {
 	static final Log LOG = LogFactory.getLog(BulkImportMain.class);
 
 	ConfigProperties config = ConfigFactory.getInstance().getConfigProperties(
-			ConfigFactory.BULK_IMPORT_CONFIG_PATH);
+			ConfigFactory.APP_CONFIG_PATH);
 
 	@Override
 	public int run(String[] args) throws Exception {
