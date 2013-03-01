@@ -1,6 +1,7 @@
 package com.baofeng.hbase.ads.redis;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class RedisBulkLoad {
 	static ConfigProperties config = ConfigFactory.getInstance()
 			.getConfigProperties(ConfigFactory.APP_CONFIG_PATH);
 	static List<String> hashFields = new ArrayList<String>();
-	
+
 	static {
 		hashFields.add("adidlist");
 		hashFields.add("attr_gender");
@@ -78,8 +79,9 @@ public class RedisBulkLoad {
 		config.setMaxIdle(20);
 		JedisPool pool = new JedisPool(config, host, port, 20000);
 		Jedis jedis = pool.getResource();
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new FileInputStream(LOCAL_DIR)));
+		BufferedReader br = new BufferedReader(
+				new InputStreamReader(new FileInputStream(LOCAL_DIR
+						+ File.separator + "part-r-00000")));
 		// BufferedReader br = new BufferedReader(new InputStreamReader(
 		// new FileInputStream(input)));
 		String line = null;
@@ -91,10 +93,10 @@ public class RedisBulkLoad {
 			if (arr.length == 2) {
 				String uid = arr[0];
 				String adidOrAttr = arr[1];
-
 				try {
 					jedis.hset(uid, field, adidOrAttr);
 				} catch (Exception e) {
+					e.printStackTrace();
 					continue;
 				} finally {
 					pool.returnResource(jedis);
