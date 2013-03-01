@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Set;
 
 import com.baofeng.advindex.Const;
+import com.baofeng.util.DateFormatUtil;
 
 //import com.baofeng.util.DateFormatUtil;
 
@@ -84,6 +85,9 @@ public class Test {
 			}
 		}
 		br.close();
+		
+		String s = DateFormatUtil.parseToStringDate(1359790111000L);
+		System.out.println(s);
 	}
 
 	private static String generateMonthInput(String input, String date) {

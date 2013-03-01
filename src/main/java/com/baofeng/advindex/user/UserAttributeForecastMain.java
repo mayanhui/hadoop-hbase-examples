@@ -42,7 +42,7 @@ public class UserAttributeForecastMain {
 	public static final String NAME = "Crowd-Attribute";
 	public static final String TMP_FILE_PATH = "/tmp/advindex_user_attr_forecast";
 	public static final String CROWD_ATTR_MAPPING = "/data/dm/baofengindex/crowd_attrs/bf_index_vv_play_album_crowd_attrs.txt";
-	public static final int NUM_REDUCE = 10;
+	public static final int NUM_REDUCE = 10 * 12;
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
@@ -52,7 +52,6 @@ public class UserAttributeForecastMain {
 		String output = cmd.getOptionValue("o");
 		String input = cmd.getOptionValue("i");
 		String date = cmd.getOptionValue("d");
-		// String hour = cmd.getOptionValue("h");
 		String jobConf = cmd.getOptionValue("jobconf");
 		String[] arr = null;
 		if (null != jobConf && jobConf.length() > 0) {
@@ -110,7 +109,9 @@ public class UserAttributeForecastMain {
 		job.setInputFormatClass(LzoTextInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 
-		// FileInputFormat.setInputPaths(job, input);
+		LzoTextInputFormat.setMaxInputSplitSize(job, 512 * 1024 * 1024L);
+		LzoTextInputFormat.setMinInputSplitSize(job, 256 * 1024 * 1024L);
+
 		LzoTextInputFormat.addInputPaths(job, input);
 		FileOutputFormat.setOutputPath(job, new Path(tmpPath, "1"));
 

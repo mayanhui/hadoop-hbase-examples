@@ -24,23 +24,18 @@ public class VVMnameMappingMapper extends
 	private Text k = new Text();
 	private Text v = new Text();
 
-	@Override
-	protected void setup(Context context) throws IOException,
-			InterruptedException {
-		super.setup(context);
-	}
+	String uid = null;
+	String type = null;
+
+	String aid = null;
+	String wid = null;
+
+	String mname = null;
 
 	@Override
 	protected void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException {
 		String valueStr = value.toString();
-		String uid = null;
-		String type = null;
-
-		String aid = null;
-		String wid = null;
-
-		String mname = null;
 
 		String[] arr = valueStr.split("\t", -1);
 		if (arr.length == 32) {// vv 31 fields
@@ -55,16 +50,17 @@ public class VVMnameMappingMapper extends
 					k.set(aid + "\t" + wid);
 					v.set(Const.ID_PREDIX + uid);
 					context.write(k, v);
-					context.getCounter("advindex-job1", "advindex_vv").increment(1);
+					context.getCounter("advindex-job1", "advindex_vv")
+							.increment(1);
 				}
 			}
 		} else if (arr.length == 1) { // mapping separator ,
 			arr = valueStr.split(",", -1);
 			if (arr.length == 6) { // mapping 6 fields
 				mname = arr[5].trim();
-
 				aid = arr[0].trim();
 				wid = arr[2].trim();
+
 				if (null != aid && null != wid && null != mname
 						&& aid.trim().length() > 0 && wid.trim().length() > 0
 						&& mname.trim().length() > 0) {
@@ -76,10 +72,5 @@ public class VVMnameMappingMapper extends
 				}
 			}
 		}
-	}
-
-	@Override
-	protected void cleanup(Context context) throws IOException,
-			InterruptedException {
 	}
 }
