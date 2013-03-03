@@ -40,8 +40,10 @@ public class RedisRead {
 		JedisPoolConfig config = new JedisPoolConfig();
 		config.setMaxActive(1000);
 		config.setMaxIdle(20);
+		host = "114.112.70.20";
 		JedisPool pool = new JedisPool(config, host, port, 20000);
 		Jedis jedis = pool.getResource();
+		jedis.auth("_houyi630");
 		String s = jedis.hget("{00002B4B-57E5-EA95-240D-E640ED575E7B}",
 				"adidlist");
 		System.out.println(s);

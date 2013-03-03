@@ -24,6 +24,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.baofeng.util.ConfigFactory;
 import com.baofeng.util.ConfigProperties;
+import com.baofeng.util.FileUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -34,6 +35,7 @@ public class RedisBulkLoad {
 
 	public static final String NAME = "Redis-Bulk-Load";
 	public static final String LOCAL_DIR = "/tmp/attribute_ads";
+	public static final String JEDIS_PASSWORD = "_houyi630";
 
 	public static String host;
 	public static int port;
@@ -71,6 +73,9 @@ public class RedisBulkLoad {
 			return;
 		}
 
+		// delete a directory
+		FileUtil.deleteFile(new File(LOCAL_DIR));
+
 		fs.copyToLocalFile(inputPath, new Path(LOCAL_DIR));
 
 		long st = System.currentTimeMillis();
@@ -79,6 +84,7 @@ public class RedisBulkLoad {
 		config.setMaxIdle(20);
 		JedisPool pool = new JedisPool(config, host, port, 20000);
 		Jedis jedis = pool.getResource();
+		jedis.auth(JEDIS_PASSWORD);
 		BufferedReader br = new BufferedReader(
 				new InputStreamReader(new FileInputStream(LOCAL_DIR
 						+ File.separator + "part-r-00000")));

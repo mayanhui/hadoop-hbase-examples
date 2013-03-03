@@ -1,12 +1,19 @@
 package com.baofeng.advindex.user;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.util.StringUtils;
 
 import com.baofeng.advindex.Const;
+import com.baofeng.util.LzoUtil;
 
 //1,55375,13,,电影,非诚勿扰
 //3,61342,13,6425002,电影,撕裂的末日
@@ -31,6 +38,45 @@ public class VVMnameMappingMapper extends
 	String wid = null;
 
 	String mname = null;
+
+	@Override
+	protected void setup(Context context) {
+		Path[] cacheFiles = new Path[0];
+		try {
+			cacheFiles = DistributedCache.getLocalCacheFiles(context
+					.getConfiguration());
+			for (Path cacheFile : cacheFiles) {
+				parseCacheFile(cacheFile, context.getConfiguration());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void parseCacheFile(Path cachFile, Configuration conf) {
+//		BufferedReader fis = null;
+//		try {
+//			fis = new BufferedReader(new FileReader(cachFile.toString()));
+//			String line = null;
+//			while ((line = fis.readLine()) != null) {
+//				
+//				System.out.println(line);
+//			}
+//		} catch (IOException ioe) {
+//			System.err
+//					.println("Caught exception while parsing the cached file '"
+//							+ StringUtils.stringifyException(ioe));
+//		} finally {
+//			if (null != fis)
+//				try {
+//					fis.close();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//		}
+
+		//		LzoUtil.readLzoFile(cachFile, conf);
+	}
 
 	@Override
 	protected void map(LongWritable key, Text value, Context context)

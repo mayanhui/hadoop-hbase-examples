@@ -15,6 +15,7 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -81,9 +82,9 @@ public class UserAttributeForecastMain {
 		}
 
 		arr = input.split(",", -1);
+		String vv = null;
+		String mapping = null;
 		if (arr.length == 2) {
-			String vv = null;
-			String mapping = null;
 			if (arr[0].indexOf("vv") >= 0) {
 				vv = arr[0].trim();
 				mapping = arr[1].trim();
@@ -91,7 +92,7 @@ public class UserAttributeForecastMain {
 				vv = arr[1].trim();
 				mapping = arr[0].trim();
 			}
-			input = generateMonthInput(vv, date) + "," + mapping;
+			input = generateMonthInput(vv, date);
 		}
 
 		System.out.println("Inputs: " + input);
@@ -108,7 +109,9 @@ public class UserAttributeForecastMain {
 		job.setOutputValueClass(Text.class);
 		job.setInputFormatClass(LzoTextInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
-
+		
+		DistributedCache.addCacheFile(new Path(mapping).toUri(), conf);
+		
 		LzoTextInputFormat.setMaxInputSplitSize(job, 512 * 1024 * 1024L);
 		LzoTextInputFormat.setMinInputSplitSize(job, 256 * 1024 * 1024L);
 
