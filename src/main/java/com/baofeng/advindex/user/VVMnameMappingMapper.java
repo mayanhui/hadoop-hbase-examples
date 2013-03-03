@@ -1,18 +1,24 @@
 package com.baofeng.advindex.user;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.StringUtils;
 
-import com.baofeng.advindex.Const;
+//import com.baofeng.advindex.Const;
+import com.baofeng.util.FileUtil;
 import com.baofeng.util.LzoUtil;
 
 //1,55375,13,,电影,非诚勿扰
@@ -37,54 +43,74 @@ public class VVMnameMappingMapper extends
 	String aid = null;
 	String wid = null;
 
-	String mname = null;
+	private Map<String, String> mapping = new HashMap<String, String>();
 
 	@Override
 	protected void setup(Context context) {
-		Path[] cacheFiles = new Path[0];
 		try {
-			cacheFiles = DistributedCache.getLocalCacheFiles(context
+			URI[] uris = DistributedCache.getCacheFiles(context
 					.getConfiguration());
-			for (Path cacheFile : cacheFiles) {
-				parseCacheFile(cacheFile, context.getConfiguration());
+			for (URI uri : uris) {
+				parseCacheFile(new Path(uri.getPath()),
+						context.getConfiguration());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void parseCacheFile(Path cachFile, Configuration conf) {
-//		BufferedReader fis = null;
-//		try {
-//			fis = new BufferedReader(new FileReader(cachFile.toString()));
-//			String line = null;
-//			while ((line = fis.readLine()) != null) {
-//				
-//				System.out.println(line);
-//			}
-//		} catch (IOException ioe) {
-//			System.err
-//					.println("Caught exception while parsing the cached file '"
-//							+ StringUtils.stringifyException(ioe));
-//		} finally {
-//			if (null != fis)
-//				try {
-//					fis.close();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//		}
+	private void parseCacheFile(Path cachFile, Configuration conf)
+			throws IOException {
+		String local = "/tmp/advindex_user";
+		FileSystem fs = FileSystem.get(conf);
+		// delete a directory
+		boolean delete = FileUtil.deleteFile(new File(local));
+		if (delete) {
+			fs.copyToLocalFile(cachFile, new Path(local,
+					"movieid-mapping.txt.lzo"));
 
-		//		LzoUtil.readLzoFile(cachFile, conf);
+			LzoUtil.unCompressLzo(local + File.separator
+					+ "movieid-mapping.txt.lzo", local + File.separator
+					+ "movieid-mapping.txt", conf);
+
+			BufferedReader fis = null;
+			try {
+				fis = new BufferedReader(new FileReader(local + File.separator
+						+ "movieid-mapping.txt"));
+				String line = null;
+				while ((line = fis.readLine()) != null) {
+					String[] arr = line.split(",");
+					if (arr.length == 6) { // mapping 6 fields
+						String mname = arr[5].trim();
+						String aid = arr[0].trim();
+						String wid = arr[2].trim();
+
+						mapping.put(aid + "\t" + wid, mname);
+					}
+				}
+			} catch (IOException ioe) {
+				System.err
+						.println("Caught exception while parsing the cached file '"
+								+ StringUtils.stringifyException(ioe));
+			} finally {
+				if (null != fis)
+					try {
+						fis.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+			}
+		}
+		System.out.println("map size: " + mapping.size());
+
 	}
 
 	@Override
 	protected void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException {
 		String valueStr = value.toString();
-
 		String[] arr = valueStr.split("\t", -1);
-		if (arr.length == 32) {// vv 31 fields
+		if (arr.length == 32) {// vv 31 fields + 1 tab
 			uid = arr[6].trim();
 			aid = arr[8].trim();
 			wid = arr[9].trim();
@@ -93,28 +119,14 @@ public class VVMnameMappingMapper extends
 				if (null != aid && null != wid && null != uid
 						&& aid.length() > 0 && wid.length() > 0
 						&& uid.length() > 0) {
-					k.set(aid + "\t" + wid);
-					v.set(Const.ID_PREDIX + uid);
-					context.write(k, v);
-					context.getCounter("advindex-job1", "advindex_vv")
-							.increment(1);
-				}
-			}
-		} else if (arr.length == 1) { // mapping separator ,
-			arr = valueStr.split(",", -1);
-			if (arr.length == 6) { // mapping 6 fields
-				mname = arr[5].trim();
-				aid = arr[0].trim();
-				wid = arr[2].trim();
-
-				if (null != aid && null != wid && null != mname
-						&& aid.trim().length() > 0 && wid.trim().length() > 0
-						&& mname.trim().length() > 0) {
-					k.set(aid + "\t" + wid);
-					v.set(Const.ATTR_PREFIX + mname);
-					context.write(k, v);
-					context.getCounter("advindex-job1", "mapping_data")
-							.increment(1);
+					String mname = mapping.get(aid + "\t" + wid);
+					if (null != mname && mname.length() > 0) {
+						k.set("0\t1\t" + uid);
+						v.set("3\t4\t5\t6\t" + mname);
+						context.write(k, v);
+						context.getCounter("advindex-job1", "advindex_vv")
+								.increment(1);
+					}
 				}
 			}
 		}

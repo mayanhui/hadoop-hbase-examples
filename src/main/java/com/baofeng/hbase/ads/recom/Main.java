@@ -36,8 +36,10 @@ public class Main {
 	public static final String NAME = "ADID-Recom-Compute";
 	public static final String TMP_FILE_PATH_1 = "/tmp/attribute_ads_1";
 	public static final String TMP_FILE_PATH_2 = "/tmp/attribute_ads_2";
-	
+
 	public static final String OUPUT_COLUMN = "attr:adid";
+	public static final String HADOOP_MAP_SPECULATIVE_EXECUTION = "mapred.map.tasks.speculative.execution";
+	public static final String HADOOP_REDUCE_SPECULATIVE_EXECUTION = "mapred.reduce.tasks.speculative.execution";
 
 	static ConfigProperties config = ConfigFactory.getInstance()
 			.getConfigProperties(ConfigFactory.APP_CONFIG_PATH);
@@ -101,8 +103,10 @@ public class Main {
 		conf.set(
 				ConfigProperties.CONFIG_NAME_HBASE_ZOOKEEPER_QUORUM,
 				config.getProperty(ConfigProperties.CONFIG_NAME_HBASE_ZOOKEEPER_QUORUM));
-
-		conf.set("mapred.job.queue.name", "ETL");
+		// set hadoop speculative execution to false
+		conf.setBoolean(HADOOP_MAP_SPECULATIVE_EXECUTION, false);
+		conf.setBoolean(HADOOP_REDUCE_SPECULATIVE_EXECUTION, false);
+		// conf.set("mapred.job.queue.name", "ETL");
 
 		FileSystem fs = FileSystem.get(conf);
 		Path tmpPath1 = new Path(TMP_FILE_PATH_1);
@@ -168,18 +172,19 @@ public class Main {
 
 			success = job.waitForCompletion(true) ? 0 : 1;
 		}
-		
-		/* step4: put uid, adidlist into hbase*/
+
+		/* step4: put uid, adidlist into hbase */
 		if (success == 0) {
 			job = new Job(conf, "attribute_ads_4");
 			job.setJarByClass(Main.class);
 			job.setMapperClass(AdidListLoadMapper.class);
 			job.setNumReduceTasks(0);
 			job.setOutputFormatClass(TableOutputFormat.class);
-			job.getConfiguration().set(TableOutputFormat.OUTPUT_TABLE, inputTable);
+			job.getConfiguration().set(TableOutputFormat.OUTPUT_TABLE,
+					inputTable);
 			job.getConfiguration().set("conf.column", OUPUT_COLUMN);
 
-			FileInputFormat.addInputPath(job,outputPath);
+			FileInputFormat.addInputPath(job, outputPath);
 
 			success = job.waitForCompletion(true) ? 0 : 1;
 		}

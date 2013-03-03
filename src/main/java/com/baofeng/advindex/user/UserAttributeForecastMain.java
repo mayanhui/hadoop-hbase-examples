@@ -43,7 +43,6 @@ public class UserAttributeForecastMain {
 	public static final String NAME = "Crowd-Attribute";
 	public static final String TMP_FILE_PATH = "/tmp/advindex_user_attr_forecast";
 	public static final String CROWD_ATTR_MAPPING = "/data/dm/baofengindex/crowd_attrs/bf_index_vv_play_album_crowd_attrs.txt";
-	public static final int NUM_REDUCE = 10 * 12;
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
@@ -103,17 +102,14 @@ public class UserAttributeForecastMain {
 		Job job = new Job(conf, "advindex uid-mname distribution");
 		job.setJarByClass(UserAttributeForecastMain.class);
 		job.setMapperClass(VVMnameMappingMapper.class);
-		job.setReducerClass(VVMnameMappingReducer.class);
-		job.setNumReduceTasks(NUM_REDUCE);
+		job.setNumReduceTasks(0);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
 		job.setInputFormatClass(LzoTextInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
-		
-		DistributedCache.addCacheFile(new Path(mapping).toUri(), conf);
-		
-		LzoTextInputFormat.setMaxInputSplitSize(job, 512 * 1024 * 1024L);
-		LzoTextInputFormat.setMinInputSplitSize(job, 256 * 1024 * 1024L);
+
+		DistributedCache.addCacheFile(new Path(mapping).toUri(),
+				job.getConfiguration());
 
 		LzoTextInputFormat.addInputPaths(job, input);
 		FileOutputFormat.setOutputPath(job, new Path(tmpPath, "1"));

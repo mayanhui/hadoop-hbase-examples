@@ -33,9 +33,11 @@ public class Main {
 
 	public static final String NAME = "ADID-Recom-Compute";
 	public static final String TMP_FILE_PATH_1 = "/tmp/attribute_ads_age_gender_1";
-	// public static final String TMP_FILE_PATH_2 = "/tmp/attribute_ads_2";
+	public static final String TMP_FILE_PATH_2 = "/tmp/attribute_ads_age_gender_2";
 
 	public static final String OUPUT_COLUMN = "attr:adid";
+	public static final String HADOOP_MAP_SPECULATIVE_EXECUTION = "mapred.map.tasks.speculative.execution";
+	public static final String HADOOP_REDUCE_SPECULATIVE_EXECUTION = "mapred.reduce.tasks.speculative.execution";
 
 	static ConfigProperties config = ConfigFactory.getInstance()
 			.getConfigProperties(ConfigFactory.APP_CONFIG_PATH);
@@ -98,13 +100,19 @@ public class Main {
 		conf.set(
 				ConfigProperties.CONFIG_NAME_HBASE_ZOOKEEPER_QUORUM,
 				config.getProperty(ConfigProperties.CONFIG_NAME_HBASE_ZOOKEEPER_QUORUM));
-
-		conf.set("mapred.job.queue.name", "ETL");
+		// set hadoop speculative execution to false
+		conf.setBoolean(HADOOP_MAP_SPECULATIVE_EXECUTION, false);
+		conf.setBoolean(HADOOP_REDUCE_SPECULATIVE_EXECUTION, false);
+//		conf.set("mapred.job.queue.name", "ETL");
 
 		FileSystem fs = FileSystem.get(conf);
 		Path tmpPath1 = new Path(TMP_FILE_PATH_1);
 		if (fs.exists(tmpPath1)) {
 			fs.delete(tmpPath1, true);
+		}
+		Path tmpPath2 = new Path(TMP_FILE_PATH_2);
+		if (fs.exists(tmpPath2)) {
+			fs.delete(tmpPath2, true);
 		}
 
 		/* step-1: scan hbase */
@@ -115,10 +123,11 @@ public class Main {
 		job.setJarByClass(Main.class);
 		job.setNumReduceTasks(0);
 		job.setOutputFormatClass(TextOutputFormat.class);
-
 		FileOutputFormat.setOutputPath(job, tmpPath1);
 
 		int success = job.waitForCompletion(true) ? 0 : 1;
+		
+//		int success = 0;
 
 		/* step2: load redis */
 		if (success == 0) {
@@ -128,12 +137,12 @@ public class Main {
 			job.setNumReduceTasks(0);
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(Text.class);
-
+			job.setOutputFormatClass(TextOutputFormat.class);
 			FileInputFormat.setInputPaths(job, tmpPath1);
+			FileOutputFormat.setOutputPath(job, tmpPath2);
 
 			success = job.waitForCompletion(true) ? 0 : 1;
 		}
-
 	}
 
 	private static CommandLine parseArgs(String[] args) throws ParseException {

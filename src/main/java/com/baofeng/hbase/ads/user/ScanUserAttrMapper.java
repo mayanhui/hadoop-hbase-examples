@@ -24,19 +24,16 @@ public class ScanUserAttrMapper extends TableMapper<Text, Text> {
 	public void map(ImmutableBytesWritable row, Result columns, Context context)
 			throws IOException {
 		String value = null;
-		// Set<String> tags = new HashSet<String>();
 		try {
 			for (KeyValue kv : columns.list()) {
 				value = Bytes.toStringBinary(kv.getValue());
-				// tags.add(value);
 				break;
 			}
-
-			// for (String tag : tags) {
-			k.set(Bytes.toStringBinary(row.get()));
-			v.set(value);
-			context.write(k, v);
-			// }
+			if (null != value && value.trim().length() > 0) {
+				k.set(Bytes.toStringBinary(row.get()));
+				v.set(value);
+				context.write(k, v);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("Error: " + e.getMessage() + ", Row: "
