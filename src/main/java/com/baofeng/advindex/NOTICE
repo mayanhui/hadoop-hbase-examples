@@ -15,10 +15,10 @@ step2：
 聚合人群属性值
 
 
-2. 广告指数-预测用户属性  user包
 
+2. 广告指数-预测用户属性  user包
 step1：
-通过aid，wid，type join
+通过aid，wid join
 获取uid mname
 
 step2：
