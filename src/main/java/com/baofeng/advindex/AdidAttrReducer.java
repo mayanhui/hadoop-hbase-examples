@@ -39,11 +39,4 @@ public class AdidAttrReducer extends Reducer<Text, Text, Text, Text> {
 		}
 	}
 	
-	public static void main(String[] args){
-		String str = "ATTR_edu 小学 32 10.85";
-		
-		str =  str.substring(str.indexOf(Const.ATTR_PREFIX)
-				+ Const.ATTR_PREFIX.length());
-		System.out.println(str);
-	}
 }

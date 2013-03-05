@@ -24,8 +24,6 @@ import org.apache.hadoop.mapreduce.lib.input.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-import com.baofeng.advindex.AdidAttrMapper;
-import com.baofeng.advindex.AdidAttrReducer;
 import com.baofeng.advindex.AggrMapper;
 import com.baofeng.advindex.AggrReducer;
 import com.baofeng.util.DateFormatUtil;
@@ -116,19 +114,23 @@ public class UserAttributeForecastMain {
 
 		int success = job.waitForCompletion(true) ? 0 : 1;
 
+		// int success = 0;
+
 		if (success == 0) {
 			/* step2: adid-attr mapping */
 			job = new Job(conf, "advindex adid-attr mapping");
 			job.setJarByClass(UserAttributeForecastMain.class);
-			job.setMapperClass(AdidAttrMapper.class);
-			job.setReducerClass(AdidAttrReducer.class);
+			job.setMapperClass(UidAttrMapper.class);
+			job.setNumReduceTasks(0);
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(Text.class);
 			job.setInputFormatClass(TextInputFormat.class);
 			job.setOutputFormatClass(TextOutputFormat.class);
 
-			FileInputFormat.setInputPaths(job, new Path(tmpPath, "1"),
-					new Path(CROWD_ATTR_MAPPING));
+			DistributedCache.addCacheFile(new Path(CROWD_ATTR_MAPPING).toUri(),
+					job.getConfiguration());
+
+			FileInputFormat.setInputPaths(job, new Path(tmpPath, "1"));
 			FileOutputFormat.setOutputPath(job, new Path(tmpPath, "2"));
 
 			success = job.waitForCompletion(true) ? 0 : 1;
@@ -144,6 +146,10 @@ public class UserAttributeForecastMain {
 			job.setOutputValueClass(Text.class);
 			job.setInputFormatClass(TextInputFormat.class);
 			job.setOutputFormatClass(TextOutputFormat.class);
+			job.setNumReduceTasks(20);
+
+			FileInputFormat.setMaxInputSplitSize(job, 1024 * 1024 * 512);
+			FileInputFormat.setMinInputSplitSize(job, 1024 * 1024 * 256);
 
 			FileInputFormat.setInputPaths(job, new Path(tmpPath, "2"));
 			FileOutputFormat.setOutputPath(job, outputPath);

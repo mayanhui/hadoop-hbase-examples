@@ -24,6 +24,10 @@ public class AggrReducer extends Reducer<Text, Text, Text, Text> {
 
 		for (Text v : values) {
 			String[] attrs = v.toString().trim().split("\\s+", -1);
+
+			if (attrs.length != 4)
+				continue;
+
 			String attr = attrs[0].trim();
 			String type = attrs[1].trim();
 			String width_value = attrs[2].trim();

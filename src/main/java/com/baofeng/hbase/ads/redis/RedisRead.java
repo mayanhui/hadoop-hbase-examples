@@ -1,5 +1,9 @@
 package com.baofeng.hbase.ads.redis;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +50,26 @@ public class RedisRead {
 		jedis.auth("_houyi630");
 		String s = jedis.hget("{00002B4B-57E5-EA95-240D-E640ED575E7B}",
 				"adidlist");
+		s = jedis.hget("{0026B69E-89DD-BDE9-D5BE-C5F9EA8D1BBB}", "adidlist");
 		System.out.println(s);
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				new FileInputStream("/root/uid_adids_recom.txt")));
+		String line = null;
+		int count = 0;
+		while (null != (line = br.readLine())) {
+			++count;
+			line = line.trim();
+			String[] arr = line.split("\t", -1);
+			if (arr.length == 2) {
+				s = jedis.hget(arr[0], "adidlist");
+				if (null != s && s.length() > 0) {
+					System.out.println(arr[0]);
+				}
+			}
+
+		}
+		br.close();
 
 		long en = System.currentTimeMillis();
 		System.out.println("time: " + (en - st));

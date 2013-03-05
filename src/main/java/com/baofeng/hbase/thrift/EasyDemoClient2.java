@@ -19,7 +19,6 @@ import org.apache.hadoop.hbase.thrift.generated.AlreadyExists;
 import org.apache.hadoop.hbase.thrift.generated.Hbase;
 import org.apache.hadoop.hbase.thrift.generated.IOError;
 import org.apache.hadoop.hbase.thrift.generated.IllegalArgument;
-import org.apache.hadoop.hbase.thrift.generated.Mutation;
 import org.apache.hadoop.hbase.thrift.generated.TCell;
 import org.apache.hadoop.hbase.thrift.generated.TRowResult;
 
@@ -28,83 +27,47 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 
-public class EasyDemoClient {
+public class EasyDemoClient2 {
 
-	static protected int port = 9090;
-	static protected String host = "114.112.82.20";
-	CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
+	static protected int port;
+	static protected String host;
+	CharsetDecoder decoder = null;
 
-	// ByteBuffer table = ByteBuffer
-	// .wrap(bytes("user_behavior_attribute_noregistered"));
-	ByteBuffer table = ByteBuffer.wrap(bytes("demo_table"));
-	ByteBuffer columns = ByteBuffer.wrap(bytes("msg:text"));
-	ByteBuffer row = ByteBuffer.wrap(bytes("i2"));
+	String table = "user_behavior_attribute_noregistered";
+	String columns = "bhvr:search";
 
-	// ByteBuffer row = ByteBuffer.wrap(bytes("2"));
+	public String fileName = "";
+	public int sleepTime = 0;
 
-	EasyDemoClient() {
+	EasyDemoClient2(String fileName) {
+		this(fileName, 0);
 	}
-
-	EasyDemoClient(String fileName, int spleepTime) {
+	
+	EasyDemoClient2(String fileName, int spleepTime) {
+		decoder = Charset.forName("UTF-8").newDecoder();
+		this.fileName = fileName;
+		this.sleepTime = spleepTime;
 	}
 
 	public static void main(String[] args) throws IOError, TException,
 			IllegalArgument, AlreadyExists, IOException {
 
-		EasyDemoClient client = new EasyDemoClient();
-		// client.run();
-		// client.delete();
-		// client.put();
-		client.get();
-	}
+		if (args.length < 1) {
+			System.out.println("Parameters needed! >=1");
+			return;
+		}
 
-	public void delete() throws IOError, TException {
-		TTransport transport = new TSocket(host, port);
-		TProtocol protocol = new TBinaryProtocol(transport, true, true);
-		Hbase.Client client = new Hbase.Client(protocol);
+		port = 9090;
+		host = "114.112.82.61";
+		String fileName = args[0];
+		int sleepTime = 0;
+		if(args.length == 2){
+			sleepTime = Integer.parseInt(args[1]);
+		}
 
-		transport.open();
-		System.out.println("Delete...");
-		client.deleteAllTs(table, row, columns, 1358503174911L, null);
-		transport.close();
-	}
-
-	public void put() throws IOError, IllegalArgument, TException {
-		TTransport transport = new TSocket(host, port);
-		TProtocol protocol = new TBinaryProtocol(transport, true, true);
-		Hbase.Client client = new Hbase.Client(protocol);
-		transport.open();
-
-		ArrayList<Mutation> mutations = new ArrayList<Mutation>();
-		mutations.add(new Mutation(false, columns, ByteBuffer
-				.wrap(bytes("23233")), false));
-		client.mutateRowTs(table, row, mutations, 1358503174910L, null);
-
-		transport.close();
-	}
-
-	public void get() throws IOError, TException {
-		TTransport transport = new TSocket(host, port);
-		TProtocol protocol = new TBinaryProtocol(transport, true, true);
-		Hbase.Client client = new Hbase.Client(protocol);
-
-		transport.open();
-
-		// List list = client.getVer(table, row,
-		// columns, 1000, null);
-		List<ByteBuffer> cols = new ArrayList<ByteBuffer>();
-		cols.add(columns);
-		cols.add(ByteBuffer.wrap(bytes("msg:status")));
-		cols.add(ByteBuffer.wrap(bytes("msg:title")));
-		List<TRowResult> list = client
-				.getRowWithColumns(table, row, cols, null);
-//		list = clijent.getRow(table, row, null);
-		List<TCell> cells = client.getVerTs(table, row, ByteBuffer.wrap(bytes("msg:title")), 3L, 1, null);
-		System.out.println(cells);
-//		printRow(list);
-		transport.close();
+		EasyDemoClient2 client = new EasyDemoClient2(fileName, sleepTime);
+		client.run();
 	}
 
 	private void run() throws IOError, TException, IllegalArgument,
@@ -116,12 +79,41 @@ public class EasyDemoClient {
 
 		transport.open();
 
-		List list = client.getVer(table, ByteBuffer
-				.wrap(bytes("{AD2C8F28-FE41-F773-B6A2-667ED6E6A4F1}")),
-				columns, 1000, null);
-		System.out.println(list);
-		// printRow(list);
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				new FileInputStream(fileName)));
+		System.out.println("Read..." + fileName);
+		String line = null;
+		int count = 0;
+		while (null != (line = br.readLine())) {
+			line = line.trim();
+			String[] arr = line.split("\t", -1);
+			if (arr.length == 2) {
+				String row = arr[0].trim();
+				List<ByteBuffer> columnList = new ArrayList<ByteBuffer>();
+				columnList.add(ByteBuffer.wrap(bytes(columns)));
+				List<TRowResult> rows = client.getRowWithColumns(
+						ByteBuffer.wrap(bytes(table)),
+						ByteBuffer.wrap(bytes(row)), columnList, null);
+
+				printRow(rows);
+			}
+			++count;
+			
+			if(count % 1000 == 0){
+				try {
+					System.out.println("sleep " + sleepTime +"ms!");
+					Thread.sleep(sleepTime);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+
+		System.out.println("Count: " + count);
+		
 		transport.close();
+		br.close();
 	}
 
 	private final void printRow(TRowResult rowResult) {
@@ -151,9 +143,6 @@ public class EasyDemoClient {
 	// Helper to translate byte[]'s to UTF8 strings
 	private String utf8(byte[] buf) {
 		try {
-			ByteBuffer.wrap(buf);
-			System.out.println(decoder);
-			decoder.decode(ByteBuffer.wrap(buf));
 			return decoder.decode(ByteBuffer.wrap(buf)).toString();
 		} catch (CharacterCodingException e) {
 			return "[INVALID UTF-8]";
