@@ -1,6 +1,7 @@
 package com.baofeng.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,12 +42,80 @@ public class HBaseScanUtil {
 	public static void main(String[] args) throws IOException {
 		// HBaseScanUtil.countByLimitVer("user_behavior_attribute_noregistered",
 		// "bhvr", "vvmid", 500);
-//		HBaseScanUtil.getRowkeyListByLimitVer(
-//				"user_behavior_attribute_noregistered", "bhvr", "vvmid", 500);
-		HBaseScanUtil.getRowkeyColumnValueListByVer("user_behavior_attribute_noregistered", "bhvr", "vvmid", 50, 500);
+		// HBaseScanUtil.getRowkeyListByLimitVer(
+		// "user_behavior_attribute_noregistered", "bhvr", "vvmid", 500);
+		// HBaseScanUtil.getRowkeyColumnValueListByVer(
+		// "user_behavior_attribute_noregistered", "bhvr", "vvmid", 50,
+		// 500);
+
+		HBaseScanUtil.getRowkeyColumnVersionCount(
+				"user_behavior_attribute_noregistered", "bhvr", "vvmid",
+				DateFormatUtil.formatStringTimeToLong2("20121207"),
+				DateFormatUtil.formatStringTimeToLong2("20130306"), true);
+
 	}
-	
-	
+
+	/**
+	 * 统计所有rowkey下某个字段的版本数量（或者去重版本数量）
+	 * 
+	 * @param tableName
+	 * @param columnFamily
+	 * @param column
+	 * @param minStamp
+	 * @param maxStamp
+	 * @param distinct
+	 * @throws IOException
+	 */
+	public static void getRowkeyColumnVersionCount(String tableName,
+			String columnFamily, String column, long minStamp, long maxStamp,
+			boolean distinct) throws IOException {
+		int total = 0;
+		long st = System.currentTimeMillis();
+		table = new HTable(config, Bytes.toBytes(tableName));
+		Scan scanner = new Scan();
+
+		/* version */
+		scanner.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column));
+		scanner.setTimeRange(minStamp, maxStamp);
+		scanner.setMaxVersions();
+
+		/* batch and caching */
+		scanner.setBatch(0);
+		scanner.setCaching(10000);
+
+		ResultScanner rsScanner = table.getScanner(scanner);
+
+		if (distinct) {
+			for (Result res : rsScanner) {
+				Set<String> set = new HashSet<String>();
+				final List<KeyValue> list = res.list();
+				String rk = null;
+				for (final KeyValue kv : list) {
+					set.add(Bytes.toStringBinary(kv.getValue()));
+					rk = getRealRowKey(kv);
+				}
+				System.out.println(rk + "\t" + set.size());
+			}
+		} else {
+			for (Result res : rsScanner) {
+				List<String> vals = new ArrayList<String>();
+				final List<KeyValue> list = res.list();
+				String rk = null;
+				for (final KeyValue kv : list) {
+					vals.add(Bytes.toStringBinary(kv.getValue()));
+					rk = getRealRowKey(kv);
+				}
+				System.out.println(rk + "\t" + vals.size());
+			}
+		}
+
+		rsScanner.close();
+
+		long en = System.currentTimeMillis();
+		System.out.println("Count: " + total);
+		System.out.println("Total Time: " + (en - st) + " ms");
+	}
+
 	/**
 	 * 
 	 * @param tableName
@@ -74,7 +143,6 @@ public class HBaseScanUtil {
 
 		ResultScanner rsScanner = table.getScanner(scanner);
 
-		
 		for (Result res : rsScanner) {
 			final List<KeyValue> list = res.list();
 			int vers = list.size();
@@ -84,22 +152,22 @@ public class HBaseScanUtil {
 				String rk = null;
 				for (final KeyValue kv : list) {
 					set.add(Bytes.toStringBinary(kv.getValue()));
-//					System.out.println(getRealRowKey(kv));
-//					break;
+					// System.out.println(getRealRowKey(kv));
+					// break;
 					rk = getRealRowKey(kv);
 				}
-				
-				if(set.size() >= startVer && set.size() <= endVer){
+
+				if (set.size() >= startVer && set.size() <= endVer) {
 					StringBuilder sb = new StringBuilder();
-					for(String s : set){
+					for (String s : set) {
 						sb.append(s + ",");
 					}
-					if(sb.length() > 0)
+					if (sb.length() > 0)
 						sb.setLength(sb.length() - 1);
-					
+
 					System.out.println(rk + "\t" + sb.toString());
 				}
-				
+
 			}
 		}
 
