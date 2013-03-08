@@ -47,11 +47,19 @@ public class HBaseScanUtil {
 		// HBaseScanUtil.getRowkeyColumnValueListByVer(
 		// "user_behavior_attribute_noregistered", "bhvr", "vvmid", 50,
 		// 500);
+		
+		if(args.length < 2){
+			System.out.println("Input args must be 2!");
+			return;
+		}
+		
+		String start = args[0];
+		String end = args[1]; //20130306
 
 		HBaseScanUtil.getRowkeyColumnVersionCount(
 				"user_behavior_attribute_noregistered", "bhvr", "vvmid",
-				DateFormatUtil.formatStringTimeToLong2("20121207"),
-				DateFormatUtil.formatStringTimeToLong2("20130306"), true);
+				DateFormatUtil.formatStringTimeToLong2(start),
+				DateFormatUtil.formatStringTimeToLong2(end), true);
 
 	}
 
