@@ -141,6 +141,7 @@ public class HBaseManager extends Thread {
 		// System.out.println(i + " DOCUMENTS done!");
 		// }
 		// }
+		
 
 		table.flushCommits();
 		table.close();
@@ -162,6 +163,8 @@ public class HBaseManager extends Thread {
 					+ Bytes.toString(dbResult.list().get(0).getValue()));
 		} catch (Exception e) {
 		}
+		
+		
 
 	}
 
@@ -390,7 +393,7 @@ public class HBaseManager extends Thread {
 		scanner.setMaxVersions(100);
 		// scanner.setCaching(100);
 		// scanner.setBatch(10);
-
+		
 		ResultScanner rsScanner = table.getScanner(scanner);
 
 		for (Result result : rsScanner) {

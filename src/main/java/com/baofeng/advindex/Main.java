@@ -129,7 +129,12 @@ public class Main {
 
 			success = job.waitForCompletion(true) ? 0 : 1;
 		}
-		
+
+		// delete tmp dirctory
+		if (fs.exists(tmpPath)) {
+			fs.delete(tmpPath, true);
+		}
+
 	}
 
 	private static String generateHourDataInput(String input, String date,
@@ -162,8 +167,7 @@ public class Main {
 		o.setRequired(true);
 		options.addOption(o);
 
-		o = new Option("o", "output", true,
-				"output directory (must exist)");
+		o = new Option("o", "output", true, "output directory (must exist)");
 		o.setArgName("output");
 		o.setRequired(true);
 		options.addOption(o);
@@ -188,8 +192,7 @@ public class Main {
 		o.setArgName("file");
 		o.setRequired(false);
 		options.addOption(o);
-		
-		
+
 		o = new Option("mapred_output_dir", "hour", true, "file");
 		o.setArgName("mapred_output_dir");
 		o.setRequired(false);

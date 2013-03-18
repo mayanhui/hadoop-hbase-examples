@@ -37,11 +37,15 @@ public class EasyDemoClient {
 	CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
 
 	ByteBuffer table = ByteBuffer
-			.wrap(bytes("user_behavior_attribute_noregistered"));
+			.wrap(bytes("user_behavior_attribute_noregistered_index"));
 	// ByteBuffer table = ByteBuffer.wrap(bytes("demo_table"));
-	ByteBuffer columns = ByteBuffer.wrap(bytes("attr:adid"));
+//	ByteBuffer columns = ByteBuffer.wrap(bytes("attr:adid"));
+	ByteBuffer columns = ByteBuffer.wrap(bytes("cf1:rk"));
+//	ByteBuffer row = ByteBuffer
+//			.wrap(bytes("{F2DE8721-B4B6-5B87-E4CB-90FA4F0CA0B8}"));
 	ByteBuffer row = ByteBuffer
-			.wrap(bytes("{F2DE8721-B4B6-5B87-E4CB-90FA4F0CA0B8}"));
+			.wrap(bytes("attr:movt_area_欧美_type_电影"));
+	
 
 	// ByteBuffer row = ByteBuffer.wrap(bytes("2"));
 
@@ -65,7 +69,7 @@ public class EasyDemoClient {
 		TTransport transport = new TSocket(host, port);
 		TProtocol protocol = new TBinaryProtocol(transport, true, true);
 		Hbase.Client client = new Hbase.Client(protocol);
-
+	
 		transport.open();
 		System.out.println("Delete...");
 		client.deleteAllTs(table, row, columns, 1358503174911L, null);
@@ -118,8 +122,7 @@ public class EasyDemoClient {
 
 		transport.open();
 
-		List list = client.getVer(table, ByteBuffer
-				.wrap(bytes("{A603E710-A74D-4BE2-6C15-2D0E61888A0D}")),
+		List list = client.getVer(table,row,
 				columns, 1000, null);
 		System.out.println(list);
 		System.out.println(list.size());

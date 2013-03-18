@@ -156,6 +156,11 @@ public class UserAttributeForecastMain {
 
 			success = job.waitForCompletion(true) ? 0 : 1;
 		}
+		
+		//delete tmp directory
+		if (fs.exists(tmpPath)) {
+			fs.delete(tmpPath, true);
+		}
 	}
 
 	private static String generateMonthInput(String input, String date) {
