@@ -197,7 +197,7 @@ public class HBaseScanUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static void getRowkeyListByLimitVer(String tableName,
+	public static void getRowkeyListBiggerThanLimitVer(String tableName,
 			String columnFamily, String column, int limitVer)
 			throws IOException {
 		int total = 0;
@@ -247,7 +247,7 @@ public class HBaseScanUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static int countByLimitVer(String tableName, String columnFamily,
+	public static int countBiggerThanLimitVer(String tableName, String columnFamily,
 			String column, int limitVer) throws IOException {
 		int total = 0;
 		long st = System.currentTimeMillis();

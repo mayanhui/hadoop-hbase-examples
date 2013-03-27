@@ -18,6 +18,7 @@ import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 
+import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
@@ -28,6 +29,7 @@ import org.apache.hadoop.hbase.filter.ColumnPaginationFilter;
 //import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.PageFilter;
+import org.apache.hadoop.hbase.mapreduce.MultiTableOutputFormat;
 //import org.apache.hadoop.hbase.filter.RegexStringComparator;
 //import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -40,7 +42,11 @@ public class HBaseManager extends Thread {
 	ConfigProperties cp = ConfigFactory.getInstance().getConfigProperties(
 			ConfigFactory.APP_CONFIG_PATH);
 
+	
+	
 	public HBaseManager() {
+		
+		
 		config = HBaseConfiguration.create();
 		config.set("hbase.master",
 				cp.getProperty(ConfigProperties.CONFIG_NAME_HBASE_MASTER));
@@ -49,10 +55,9 @@ public class HBaseManager extends Thread {
 				"hbase.zookeeper.quorum",
 				cp.getProperty(ConfigProperties.CONFIG_NAME_HBASE_ZOOKEEPER_QUORUM));
 		try {
-//			table = new HTable(config,
-//					Bytes.toBytes("user_behavior_attribute_noregistered"));
-			table = new HTable(config,
-					Bytes.toBytes("demo_table"));
+			// table = new HTable(config,
+			// Bytes.toBytes("user_behavior_attribute_noregistered"));
+			table = new HTable(config, Bytes.toBytes("demo_table"));
 			admin = new HBaseAdmin(config);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -92,18 +97,37 @@ public class HBaseManager extends Thread {
 	public static void main(String[] args) throws Exception {
 		HBaseManager m = new HBaseManager();
 		// m.testScanner();
-		// m.put();
-		 m.testGet();
+		 m.put();
+		// m.testGet();
 		// m.testScanGet();
 //		m.testPageFilter();
+//		m.testPageFilter2(2, Bytes.toBytes("row1"));
 		System.out.println("-------------------------------");
-//		m.testColumnPaginationFilter();
-//		Put put = new Put(Bytes.toBytes("{1F591795-74DE-EB70-0245-0E4465C72CFA}"));
-//		put.add(Bytes.toBytes("bhvr"), Bytes.toBytes("vvmid"),
-//				Bytes.toBytes(123111));
-//		System.out.println(put.toJSON());
+		// m.testColumnPaginationFilter();
+		// Put put = new
+		// Put(Bytes.toBytes("{1F591795-74DE-EB70-0245-0E4465C72CFA}"));
+		// put.add(Bytes.toBytes("bhvr"), Bytes.toBytes("vvmid"),
+		// Bytes.toBytes(123111));
+		// System.out.println(put.toJSON());
+		 m.testIncr();
+	}
 
-		
+	public void testIncr() throws IOException {
+		long st = System.currentTimeMillis();
+		byte[] rk = Bytes.toBytes("row1");
+		byte[] cf = Bytes.toBytes("cf1");
+		byte[] c = Bytes.toBytes("mid_cnt");
+
+		long cur = table.incrementColumnValue(rk, cf, c, 0L);
+		System.out.println("cur: " + cur);
+		cur = table.incrementColumnValue(rk, cf, c, 1024L);
+		System.out.println("cur: " + cur);
+		cur = table.incrementColumnValue(rk, cf, c, 0L);
+		System.out.println("cur: " + cur);
+
+		long en = System.currentTimeMillis();
+
+		System.out.println("time: " + (en - st) + "... ms");
 	}
 
 	public static final boolean AUTO_FLUSH = false;
@@ -118,8 +142,8 @@ public class HBaseManager extends Thread {
 
 		// for (int i = 0; i < 100000; i++) {
 
-		put = new Put(Bytes.toBytes("{1F591795-74DE-EB70-0245-0E4465C72CFA}"));
-		put.add(Bytes.toBytes("bhvr"), Bytes.toBytes("vvmid"),
+		put = new Put(Bytes.toBytes("row1"),10L);
+		put.add(Bytes.toBytes("cf1"), Bytes.toBytes("mid"),
 				Bytes.toBytes(123111));
 		// put.add(Bytes.toBytes("vv_log"), Bytes.toBytes("stat_hour"),
 		// Bytes.toBytes("20"));
@@ -141,7 +165,6 @@ public class HBaseManager extends Thread {
 		// System.out.println(i + " DOCUMENTS done!");
 		// }
 		// }
-		
 
 		table.flushCommits();
 		table.close();
@@ -163,8 +186,6 @@ public class HBaseManager extends Thread {
 					+ Bytes.toString(dbResult.list().get(0).getValue()));
 		} catch (Exception e) {
 		}
-		
-		
 
 	}
 
@@ -300,13 +321,13 @@ public class HBaseManager extends Thread {
 		scanner.setMaxVersions();
 
 		/* filter */
-		// Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new
-		// RegexStringComparator("20121.*_AF6E39E3-3174-7BBF-7EE9-02AB6528897B"));
-		// scanner.setFilter(filter);
+//		 Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new
+//		 RegexStringComparator("20121.*_AF6E39E3-3174-7BBF-7EE9-02AB6528897B"));
+//		 scanner.setFilter(filter);
 
 		/* batch and caching */
-		// scanner.setBatch(0);
-		// scanner.setCaching(100000);
+		 scanner.setBatch(0);
+		 scanner.setCaching(100000);
 
 		ResultScanner rsScanner = table.getScanner(scanner);
 
@@ -362,16 +383,15 @@ public class HBaseManager extends Thread {
 
 	public void testGet() throws IOException {
 		long st = System.currentTimeMillis();
-		Get get = new Get(
-				Bytes.toBytes("i2"));
+		Get get = new Get(Bytes.toBytes("i2"));
 		get.addColumn(Bytes.toBytes("msg"), Bytes.toBytes("title"));
 		get.setMaxVersions(100);
 		// get.setTimeRange(1354010844711L - 12000L, 1354010844711L);
 
 		get.setTimeStamp(3L);
 
-//		Filter filter = new ColumnPaginationFilter(1, 10);
-//		get.setFilter(filter);
+		// Filter filter = new ColumnPaginationFilter(1, 10);
+		// get.setFilter(filter);
 
 		Result dbResult = table.get(get);
 
@@ -393,7 +413,7 @@ public class HBaseManager extends Thread {
 		scanner.setMaxVersions(100);
 		// scanner.setCaching(100);
 		// scanner.setBatch(10);
-		
+
 		ResultScanner rsScanner = table.getScanner(scanner);
 
 		for (Result result : rsScanner) {
@@ -415,7 +435,7 @@ public class HBaseManager extends Thread {
 		System.out.println("Total Time: " + (en2 - st) + " ms");
 	}
 
-	public static final byte[] POSTFIX = new byte []{1};
+	public static final byte[] POSTFIX = new byte[] { 1 };
 
 	public void testPageFilter() throws IOException {
 		long st = System.currentTimeMillis();
@@ -444,6 +464,36 @@ public class HBaseManager extends Thread {
 			if (localRows == 0)
 				break;
 		}
+		System.out.println("total rows: " + totalRows);
+
+		long en2 = System.currentTimeMillis();
+		System.out.println("Total Time: " + (en2 - st) + " ms");
+	}
+
+	public void testPageFilter2(int pageSize, byte[] lastRow)
+			throws IOException {
+		long st = System.currentTimeMillis();
+
+		Filter filter = new PageFilter(pageSize);
+		int totalRows = 0;
+
+		Scan scan = new Scan();
+		scan.setFilter(filter);
+		if (lastRow != null) {
+			byte[] startRow = Bytes.add(lastRow, POSTFIX);
+			System.out.println("start row: " + Bytes.toStringBinary(startRow));
+			scan.setStartRow(startRow);
+		}
+		ResultScanner scanner = table.getScanner(scan);
+		int localRows = 0;
+		Result result;
+		while ((result = scanner.next()) != null) {
+			System.out.println(localRows++ + ": " + result);
+			totalRows++;
+			lastRow = result.getRow();
+		}
+		scanner.close();
+
 		System.out.println("total rows: " + totalRows);
 
 		long en2 = System.currentTimeMillis();
