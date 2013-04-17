@@ -59,5 +59,7 @@ public class DateFormatUtil {
 		System.out.println(getLastHour());
 		str = "20130302";
 		System.out.println(formatStringTimeToLong2(str));
+		Long t = 1361096403000l;
+		System.out.println(parseToStringDate(t));
 	}
 }

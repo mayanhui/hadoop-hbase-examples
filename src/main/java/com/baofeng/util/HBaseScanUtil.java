@@ -47,19 +47,25 @@ public class HBaseScanUtil {
 		// HBaseScanUtil.getRowkeyColumnValueListByVer(
 		// "user_behavior_attribute_noregistered", "bhvr", "vvmid", 50,
 		// 500);
-		
-		if(args.length < 2){
-			System.out.println("Input args must be 2!");
-			return;
-		}
-		
-		String start = args[0];
-		String end = args[1]; //20130306
 
-		HBaseScanUtil.getRowkeyColumnVersionCount(
-				"user_behavior_attribute_noregistered", "bhvr", "vvmid",
-				DateFormatUtil.formatStringTimeToLong2(start),
-				DateFormatUtil.formatStringTimeToLong2(end), true);
+//		if (args.length < 2) {
+//			System.out.println("Input args must be 2!");
+//			return;
+//		}
+//
+//		String start = args[0];
+//		String end = args[1]; 
+//
+//		HBaseScanUtil.getRowkeyColumnVersionCount(
+//				"user_behavior_attribute_noregistered", "bhvr", "vvmid",
+//				DateFormatUtil.formatStringTimeToLong2(start),
+//				DateFormatUtil.formatStringTimeToLong2(end), true);
+
+		
+		List<String> cols = new ArrayList<String>();
+		cols.add("gender");
+		cols.add("age");
+		getSpecialColumns("user_behavior_attribute", "attr", cols);
 
 	}
 
@@ -247,8 +253,9 @@ public class HBaseScanUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static int countBiggerThanLimitVer(String tableName, String columnFamily,
-			String column, int limitVer) throws IOException {
+	public static int countBiggerThanLimitVer(String tableName,
+			String columnFamily, String column, int limitVer)
+			throws IOException {
 		int total = 0;
 		long st = System.currentTimeMillis();
 		table = new HTable(config, Bytes.toBytes(tableName));
@@ -292,5 +299,49 @@ public class HBaseScanUtil {
 		String rowKey = Bytes.toStringBinary(kv.getBuffer(), kv.getOffset()
 				+ KeyValue.ROW_OFFSET + Bytes.SIZEOF_SHORT, rowlength);
 		return rowKey;
+	}
+
+	public static void getSpecialColumns(String tableName, String columnFamily,
+			List<String> columns) throws IOException {
+		int total = 0;
+		long st = System.currentTimeMillis();
+		table = new HTable(config, Bytes.toBytes(tableName));
+		Scan scanner = new Scan();
+
+		/* version */
+		for (String column : columns) {
+			scanner.addColumn(Bytes.toBytes(columnFamily),
+					Bytes.toBytes(column));
+		}
+
+		/* batch and caching */
+		scanner.setBatch(0);
+		scanner.setCaching(10000);
+
+		ResultScanner rsScanner = table.getScanner(scanner);
+
+		for (Result res : rsScanner) {
+			final List<KeyValue> list = res.list();
+			StringBuilder sb = new StringBuilder();
+			for (final KeyValue kv : list) {
+				sb.append(getRealRowKey(kv) + "\t");
+				break;
+			}
+			for (final KeyValue kv : list) {
+				sb.append(Bytes.toStringBinary(kv.getValue()) + "\t");
+			}
+
+			if (sb.length() > 0)
+				sb.setLength(sb.length() - 1);
+
+			System.out.println(sb.toString());
+		}
+
+		rsScanner.close();
+
+		long en = System.currentTimeMillis();
+		System.out.println("Count: " + total);
+		System.out.println("Total Time: " + (en - st) + " ms");
+
 	}
 }
