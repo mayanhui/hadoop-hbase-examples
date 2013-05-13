@@ -48,25 +48,76 @@ public class HBaseScanUtil {
 		// "user_behavior_attribute_noregistered", "bhvr", "vvmid", 50,
 		// 500);
 
-//		if (args.length < 2) {
-//			System.out.println("Input args must be 2!");
-//			return;
-//		}
-//
-//		String start = args[0];
-//		String end = args[1]; 
-//
-//		HBaseScanUtil.getRowkeyColumnVersionCount(
-//				"user_behavior_attribute_noregistered", "bhvr", "vvmid",
-//				DateFormatUtil.formatStringTimeToLong2(start),
-//				DateFormatUtil.formatStringTimeToLong2(end), true);
+		// if (args.length < 2) {
+		// System.out.println("Input args must be 2!");
+		// return;
+		// }
+		//
+		// String start = args[0];
+		// String end = args[1];
+		//
+		// HBaseScanUtil.getRowkeyColumnVersionCount(
+		// "user_behavior_attribute_noregistered", "bhvr", "vvmid",
+		// DateFormatUtil.formatStringTimeToLong2(start),
+		// DateFormatUtil.formatStringTimeToLong2(end), true);
 
-		
-		List<String> cols = new ArrayList<String>();
-		cols.add("gender");
-		cols.add("age");
-		getSpecialColumns("user_behavior_attribute", "attr", cols);
+		// List<String> cols = new ArrayList<String>();
+		// cols.add("gender");
+		// cols.add("age");
+		// getSpecialColumns("user_behavior_attribute", "attr", cols);
 
+		getRowkeyColumnByMaxVer("user_behavior_attribute_noregistered", "bhvr",
+				"vvmid", 101);
+
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param tableName
+	 * @param columnFamily
+	 * @param column
+	 * @param minStamp
+	 * @param maxStamp
+	 * @param distinct
+	 * @throws IOException
+	 */
+	public static void getRowkeyColumnByMaxVer(String tableName,
+			String columnFamily, String column, int maxVer) throws IOException {
+		int total = 0;
+		long st = System.currentTimeMillis();
+		table = new HTable(config, Bytes.toBytes(tableName));
+		Scan scanner = new Scan();
+
+		/* version */
+		scanner.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column));
+		scanner.setMaxVersions(maxVer);
+
+		/* batch and caching */
+		scanner.setBatch(0);
+		scanner.setCaching(10000);
+
+		ResultScanner rsScanner = table.getScanner(scanner);
+
+		for (Result res : rsScanner) {
+			final List<KeyValue> list = res.list();
+			String rk = null;
+			StringBuilder sb = new StringBuilder();
+			for (final KeyValue kv : list) {
+				sb.append(Bytes.toStringBinary(kv.getValue()) + ",");
+				rk = getRealRowKey(kv);
+			}
+			if (sb.toString().length() > 0)
+				sb.setLength(sb.toString().length() - 1);
+
+			System.out.println(rk + "\t" + sb.toString());
+		}
+
+		rsScanner.close();
+
+		long en = System.currentTimeMillis();
+		System.out.println("Count: " + total);
+		System.out.println("Total Time: " + (en - st) + " ms");
 	}
 
 	/**
