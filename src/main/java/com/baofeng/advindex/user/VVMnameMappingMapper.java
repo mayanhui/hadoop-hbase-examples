@@ -110,7 +110,7 @@ public class VVMnameMappingMapper extends
 			throws IOException, InterruptedException {
 		String valueStr = value.toString();
 		String[] arr = valueStr.split("\t", -1);
-		if (arr.length == 32) {// vv 31 fields + 1 tab
+		if (arr.length >= 32) {// vv 31 fields + 1 tab
 			uid = arr[6].trim();
 			aid = arr[8].trim();
 			wid = arr[9].trim();
