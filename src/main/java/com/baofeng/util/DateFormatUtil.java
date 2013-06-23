@@ -29,8 +29,14 @@ public class DateFormatUtil {
 		}
 		return time;
 	}
-
+	
 	public static String parseToStringDate(long ms) {
+		SimpleDateFormat format = new SimpleDateFormat(FROMAT);
+		String time = format.format(new Date(ms));
+		return time;
+	}
+
+	public static String parseToStringDate2(long ms) {
 		SimpleDateFormat format = new SimpleDateFormat(FROMAT_2);
 		String time = format.format(new Date(ms));
 		return time;
@@ -59,7 +65,7 @@ public class DateFormatUtil {
 		System.out.println(getLastHour());
 		str = "20130302";
 		System.out.println(formatStringTimeToLong2(str));
-		Long t = 1361096403000l;
+		Long t = 1369826004957l;
 		System.out.println(parseToStringDate(t));
 	}
 }
