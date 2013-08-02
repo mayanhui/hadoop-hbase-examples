@@ -372,6 +372,40 @@ public class HBaseManager extends Thread {
 		//
 		// }
 	}
+	
+	public void scanTs(long startTime, long endTime, String[] columns)
+			throws IOException {
+		Scan scanner = new Scan();
+
+		/* version */
+		scanner.setTimeRange(startTime, endTime);
+		/* columns */
+		for (String col : columns) {
+			byte[][] colkey = KeyValue.parseColumn(Bytes.toBytes(col));
+			if (colkey.length > 1) {
+				scanner.addColumn(colkey[0], colkey[1]);
+			} else {
+				scanner.addFamily(colkey[0]);
+			}
+		}
+		/* batch and caching */
+		scanner.setBatch(0);
+		scanner.setCaching(100000);
+
+		ResultScanner rsScanner = table.getScanner(scanner);
+
+		for (Result res : rsScanner) {
+			final List<KeyValue> list = res.list();
+			for (final KeyValue kv : list) {
+				kv.getTimestamp();
+				System.out.println(getRealRowKey(kv));
+				break;
+			}
+		}
+		rsScanner.close();
+
+	}
+	
 
 	public static String getRealRowKey(KeyValue kv) {
 		int rowlength = Bytes.toShort(kv.getBuffer(), kv.getOffset()
