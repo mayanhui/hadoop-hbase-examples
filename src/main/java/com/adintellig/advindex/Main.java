@@ -18,6 +18,7 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -28,8 +29,8 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.adintellig.util.DateFormatUtil;
 
-
 import java.io.File;
+import java.io.IOException;
 
 public class Main {
 	static final Log LOG = LogFactory.getLog(Main.class);
@@ -80,6 +81,7 @@ public class Main {
 			fs.delete(tmpPath, true);
 		}
 
+		// generate hour input path
 		arr = input.split(",", -1);
 		if (arr.length == 2) {
 			String hourData = null;
@@ -139,25 +141,29 @@ public class Main {
 	}
 
 	private static String generateHourDataInput(String input, String date,
-			String hour) {
-		String rst = null;
+			String hour) throws IOException {
+		StringBuilder sb = new StringBuilder();
 		if (null != input && null != date && null != hour) {
 			if (input.endsWith(File.separator)) {
 				input = input.substring(0, input.length() - 1);
 			}
-			rst = input + java.io.File.separator + date
-					+ java.io.File.separator + "00";
-			int h = Integer.parseInt(hour);
-			for (int i = 1; i < h; i++) {
-				if (i < 10) {
-					rst = rst + "," + input + java.io.File.separator + date
-							+ java.io.File.separator + "0" + i;
-				} else
-					rst = rst + "," + input + java.io.File.separator + date
-							+ java.io.File.separator + i;
+
+			FileSystem fs = FileSystem.get(new Configuration());
+			FileStatus[] fstat = fs.listStatus(new Path(input, date));
+			int maxHourNum = Integer.parseInt(hour);
+			for (FileStatus stat : fstat) {
+				String fileName = stat.getPath().getName();
+				int hourNum = Integer.parseInt(fileName);
+				if (hourNum < maxHourNum) {
+					sb.append(stat.getPath() + ",");
+				}
 			}
+
+			if (sb.toString().length() > 0)
+				sb.setLength(sb.toString().length() - 1);
+
 		}
-		return rst;
+		return sb.toString();
 	}
 
 	private static CommandLine parseArgs(String[] args) throws ParseException {
