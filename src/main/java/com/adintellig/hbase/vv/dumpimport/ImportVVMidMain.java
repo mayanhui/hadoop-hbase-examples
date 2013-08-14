@@ -35,7 +35,7 @@ public class ImportVVMidMain extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {
 		if (args.length != 3) {
-			LOG.info("Usage: 3 parameters needed!\nhadoop jar hbase-buld-import-0.1.jar <inputPath> <tableName> <columns>");
+			LOG.info("Usage: 3 parameters needed!\nhadoop jar hbase-buld-import-0.1.jar <class> <inputPath> <tableName> <columns>");
 			System.exit(1);
 		}
 

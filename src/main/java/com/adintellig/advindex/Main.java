@@ -93,8 +93,14 @@ public class Main {
 				hourData = arr[1].trim();
 				attrData = arr[0].trim();
 			}
-			input = generateHourDataInput(hourData, date, hour) + ","
-					+ attrData;
+
+			String hourInput = generateHourDataInput(hourData, date, hour);
+			if (hour.equals("0") || hour.equals("00")) {
+				date = DateFormatUtil.parseToStringDate2(DateFormatUtil
+						.formatStringTimeToLong2(date) - 3600 * 60 * 24);
+				hourInput = generateHourDataInput(hourData, date, "24");
+			}
+			input = hourInput + "," + attrData;
 		}
 
 		System.out.println("Inputs: " + input);

@@ -91,6 +91,8 @@ public class EasyDemoClient {
 	}
 
 	public void get() throws IOError, TException {
+		System.out.println();
+		
 		TTransport transport = new TSocket(host, port);
 		TProtocol protocol = new TBinaryProtocol(transport, true, true);
 		Hbase.Client client = new Hbase.Client(protocol);

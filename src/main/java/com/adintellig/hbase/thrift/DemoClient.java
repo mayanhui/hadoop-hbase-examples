@@ -84,7 +84,7 @@ public class DemoClient {
 //        host = args[0];
 
 		port = 9090;
-		host = "114.112.82.20";
+		host = "119.188.128.182";
 
 		DemoClient client = new DemoClient();
 		client.run();

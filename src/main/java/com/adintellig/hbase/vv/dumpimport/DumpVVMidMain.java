@@ -36,7 +36,7 @@ public class DumpVVMidMain {
 		scan.setBatch(0);
 		scan.setCaching(10000);
 		scan.setMaxVersions();
-		scan.setTimeRange(System.currentTimeMillis() - 30 * 24 * 3600 * 1000L,
+		scan.setTimeRange(System.currentTimeMillis() - 3 * 24 * 3600 * 1000L,
 				System.currentTimeMillis());
 		/* configure scan */
 
