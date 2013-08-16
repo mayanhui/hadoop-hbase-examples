@@ -39,6 +39,9 @@ import org.apache.hadoop.hbase.thrift.generated.IllegalArgument;
 import org.apache.hadoop.hbase.thrift.generated.Mutation;
 import org.apache.hadoop.hbase.thrift.generated.TCell;
 import org.apache.hadoop.hbase.thrift.generated.TRowResult;
+import org.apache.hadoop.hbase.thrift2.generated.TColumn;
+import org.apache.hadoop.hbase.thrift2.generated.TScan;
+import org.apache.hadoop.hbase.thrift2.generated.TTimeRange;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -300,7 +303,7 @@ public class DemoClient {
         System.out.println("Starting scanner...");
         scanner = client.scannerOpenWithStop(ByteBuffer.wrap(t), ByteBuffer.wrap(bytes("00020")), ByteBuffer.wrap(bytes("00040")),
                 columnNames, null);
-
+        
         while (true) {
             List<TRowResult> entry = client.scannerGet(scanner);
             if (entry.isEmpty()) {

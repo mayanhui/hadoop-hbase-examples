@@ -110,6 +110,8 @@ public class EasyDemoClient {
 		// list = clijent.getRow(table, row, null);
 		List<TCell> cells = client.getVerTs(table, row,
 				ByteBuffer.wrap(bytes("msg:title")), 3L, 1, null);
+		
+		
 		System.out.println(cells);
 		// printRow(list);
 		transport.close();
@@ -121,7 +123,8 @@ public class EasyDemoClient {
 		TTransport transport = new TSocket(host, port);
 		TProtocol protocol = new TBinaryProtocol(transport, true, true);
 		Hbase.Client client = new Hbase.Client(protocol);
-
+		
+		
 		transport.open();
 
 		List list = client.getVer(table,row,
