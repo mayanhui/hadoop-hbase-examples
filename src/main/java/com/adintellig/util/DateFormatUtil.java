@@ -67,5 +67,8 @@ public class DateFormatUtil {
 		System.out.println(formatStringTimeToLong2(str));
 		Long t = 1375709403000l;
 		System.out.println(parseToStringDate(t));
+		
+		System.out.println(formatStringTimeToLong("2012-01-01 00:00:00"));
+		System.out.println(formatStringTimeToLong2("20120101"));
 	}
 }

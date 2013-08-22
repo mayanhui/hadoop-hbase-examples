@@ -25,6 +25,8 @@ public class DemoClient {
 		System.out.println("Thrift2 Demo");
 
 		String host = "222.173.25.115";
+		host = "222.173.25.101";
+//		host = "114.112.82.24";
 		int port = 9090;
 		int timeout = 10000;
 		boolean framed = false;

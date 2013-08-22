@@ -23,6 +23,7 @@ import org.apache.hadoop.hbase.thrift.generated.IOError;
 import org.apache.hadoop.hbase.thrift.generated.IllegalArgument;
 import org.apache.hadoop.hbase.thrift.generated.TCell;
 import org.apache.hadoop.hbase.thrift.generated.TRowResult;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -42,6 +43,9 @@ public class EasyDemoClient2 {
 	public String fileName = "";
 	public int sleepTime = 0;
 
+	EasyDemoClient2() {
+	}
+
 	EasyDemoClient2(String fileName) {
 		this(fileName, 0);
 	}
@@ -55,21 +59,63 @@ public class EasyDemoClient2 {
 	public static void main(String[] args) throws IOError, TException,
 			IllegalArgument, AlreadyExists, IOException {
 
-		if (args.length < 1) {
-			System.out.println("Parameters needed! >=1");
-			return;
-		}
+		// if (args.length < 1) {
+		// System.out.println("Parameters needed! >=1");
+		// return;
+		// }
 
 		port = 9090;
 		host = "119.188.128.182";
-		String fileName = args[0];
-		int sleepTime = 0;
-		if (args.length == 2) {
-			sleepTime = Integer.parseInt(args[1]);
-		}
+		// String fileName = args[0];
+		// int sleepTime = 0;
+		// if (args.length == 2) {
+		// sleepTime = Integer.parseInt(args[1]);
+		// }
 
-		EasyDemoClient2 client = new EasyDemoClient2(fileName, sleepTime);
-		client.run2();
+		EasyDemoClient2 client = new EasyDemoClient2();
+		client.run3();
+	}
+
+	private void run3() throws IOError, TException, IllegalArgument,
+			AlreadyExists, IOException {
+		// init
+		TTransport transport = new TSocket(host, port);
+		TProtocol protocol = new TBinaryProtocol(transport, true, true);
+		Hbase.Client client = new Hbase.Client(protocol);
+
+		transport.open();
+
+		// List<ByteBuffer> columnList = new ArrayList<ByteBuffer>();
+		// columnList.add(ByteBuffer.wrap(bytes(columns)));
+		// List<TRowResult> rows = client.getRowWithColumns(
+		// ByteBuffer.wrap(bytes(table)), ByteBuffer.wrap(bytes(row)),
+		// columnList, null);
+
+		List<TRowResult> results = client.getRow(ByteBuffer
+				.wrap(bytes("user_test2")), ByteBuffer
+				.wrap(bytes("{02FAF4E5-A3AE-8E64-91B5-9FE0B03B98C2}")), null);
+		
+		for(TRowResult r : results){
+			System.out.println(Bytes.toString(r.getRow()));
+			
+			Map<ByteBuffer,TCell> cols = r.getColumns();
+			StringBuilder rowStr = new StringBuilder();
+			for (SortedMap.Entry<ByteBuffer, TCell> entry : cols.entrySet()) {
+				rowStr.append(Bytes.toString(entry.getKey().array()));
+				rowStr.append(" => ");
+				rowStr.append(Bytes.toString(entry.getValue().value.array()));
+				rowStr.append("\n ");
+				
+			}
+			
+			System.out.println(rowStr.toString());
+			System.out.println(r.toString());
+		}
+		// List<TCell> cells = client.get(ByteBuffer.wrap(bytes("user_test2")),
+		// ByteBuffer.wrap(bytes("{02FAF4E5-A3AE-8E64-91B5-9FE0B03B98C2}")),
+		// null, null);
+
+		transport.close();
 	}
 
 	private void run() throws IOError, TException, IllegalArgument,
@@ -179,7 +225,7 @@ public class EasyDemoClient2 {
 				System.out.println("[2]Time cost: " + (en - st) + "ms");
 				System.out.println("Count: " + count);
 			}
-			
+
 			long end = System.currentTimeMillis();
 			System.out.println("AVG: " + ((end - start) / count) + "ms");
 		} catch (IOException e) {
