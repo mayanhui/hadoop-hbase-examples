@@ -19,7 +19,7 @@ public class Main {
 
 	public static final String NAME = "User Attribute Lib";
 	public static String inputTable = "user_behavior_attribute_noregistered";
-	public static String outputTable = "user_behavior_attribute_noregistered";
+	public static String outputTable = "user_test";
 	public static String mapping = "/tmp/movieid-mapping.csv";
 
 	static ConfigProperties config = ConfigFactory.getInstance()
