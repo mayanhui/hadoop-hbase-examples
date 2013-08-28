@@ -14,7 +14,6 @@ import java.util.Set;
 
 import com.adintellig.util.DateFormatUtil;
 
-
 //import com.baofeng.util.DateFormatUtil;
 
 import redis.clients.jedis.Jedis;
@@ -56,38 +55,42 @@ public class Test {
 	}
 
 	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new FileInputStream("/root/vv.txt")));
-		String line = null;
-		while (null != (line = br.readLine())) {
-			String[] arr = line.split("\t", -1);
-			String uid = null;
-			String type = null;
+		// BufferedReader br = new BufferedReader(new InputStreamReader(
+		// new FileInputStream("/root/vv.txt")));
+		// String line = null;
+		// while (null != (line = br.readLine())) {
+		// String[] arr = line.split("\t", -1);
+		// String uid = null;
+		// String type = null;
+		//
+		// String aid = null;
+		// String wid = null;
+		//
+		// String mname = null;
+		// if (arr.length == 31) {// vv 31 fields
+		// uid = arr[6].trim();
+		//
+		// aid = arr[8].trim();
+		// wid = arr[9].trim();
+		// type = arr[11].trim();
+		//
+		// if (null != type && type.equals("2")) {// 成功vv
+		// if (null != aid && null != wid && null != uid
+		// && aid.length() > 0 && wid.length() > 0
+		// && uid.length() > 0) {
+		// System.out.println(uid + "|" + aid + "|" + wid + "|" + type);
+		// }
+		// }
+		// }
+		// }
+		// br.close();
+		//
+		// String s = DateFormatUtil.parseToStringDate(1359790111000L);
+		// System.out.println(s);
 
-			String aid = null;
-			String wid = null;
-
-			String mname = null;
-			if (arr.length == 31) {// vv 31 fields
-				uid = arr[6].trim();
-
-				aid = arr[8].trim();
-				wid = arr[9].trim();
-				type = arr[11].trim();
-
-				if (null != type && type.equals("2")) {// 成功vv
-					if (null != aid && null != wid && null != uid
-							&& aid.length() > 0 && wid.length() > 0
-							&& uid.length() > 0) {
-						System.out.println(uid + "|" + aid + "|" + wid + "|" + type);
-					}
-				}
-			}
-		}
-		br.close();
-		
-		String s = DateFormatUtil.parseToStringDate(1359790111000L);
-		System.out.println(s);
+		String line = "\u661f\u9645\u5f81\u670d\u8005 DVD\u5168\u96c61";
+		line = "value = {'vid':'513009','aid':'40989','uid':'13122609814632914','time':1373957217,'timecount':'0','video':{'vtitle':'\u4e24\u4e2a\u7238\u7238_01 (480P)','vid':'513009','aid':'40989','wid':'13','pid':'newbox','channel':'','movieid':'230644','location':'1'}}";
+		System.out.println(line);
 	}
 
 	private static String generateMonthInput(String input, String date) {
