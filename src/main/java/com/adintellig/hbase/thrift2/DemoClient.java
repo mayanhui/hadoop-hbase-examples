@@ -1,5 +1,6 @@
 package com.adintellig.hbase.thrift2;
 
+import java.lang.Character.UnicodeBlock;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.apache.hadoop.hbase.thrift2.generated.TIllegalArgument;
 import org.apache.hadoop.hbase.thrift2.generated.TResult;
 import org.apache.hadoop.hbase.thrift2.generated.TScan;
 import org.apache.hadoop.hbase.thrift2.generated.TTimeRange;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -24,9 +26,7 @@ public class DemoClient {
 			TIllegalArgument {
 		System.out.println("Thrift2 Demo");
 
-		String host = "222.173.25.115";
-		host = "222.173.25.101";
-//		host = "114.112.82.24";
+		String host = "192.168.1.115";
 		int port = 9090;
 		int timeout = 10000;
 		boolean framed = false;
@@ -43,7 +43,11 @@ public class DemoClient {
 		transport.open();
 
 		String tableName = "user_behavior_attribute_noregistered";
+		// tableName = "user_behavior_attribute";
+		// tableName = "user_test";
 		String rowkey = "{663FCA96-B865-8AB8-A416-9BBFB5F983CB}";
+		// rowkey = "13122609814632914";
+		// rowkey = "Log_EXPRESS";
 		String columnFamily = "bhvr";
 
 		ByteBuffer table = ByteBuffer.wrap(tableName.getBytes());
@@ -87,7 +91,7 @@ public class DemoClient {
 		scan.setStartRow(rowkey.getBytes());
 		scan.setStopRow(rowkey.getBytes());
 		// set timerange
-		TTimeRange timeRange = new TTimeRange(1376450385000L, 13764503850000L);
+		TTimeRange timeRange = new TTimeRange(137645038500L, 13764503850000L);
 		scan.setTimeRange(timeRange);
 		// set column
 		List<TColumn> columns = new ArrayList<TColumn>();
@@ -98,15 +102,14 @@ public class DemoClient {
 		// filter
 		/* a. 找到以"FAV_"开头的所有列 */
 		String filterString = "QualifierFilter(=,'regexstring:^FAV_.*')";
-		
+		filterString = "QualifierFilter(=,'regexstring:^M_.*')";
 		/* b. 找到字段"FAV_42666" */
 		// String filterString = "QualifierFilter(=,'binary:FAV_42666')";
 		scan.setFilterString(filterString.getBytes());
 
 		int scannerId = client.openScanner(table, scan);
 
-		List<TResult> tResults = client.getScannerRows(scannerId,
-				1);
+		List<TResult> tResults = client.getScannerRows(scannerId, 1);
 
 		for (TResult r : tResults) {
 			System.out.println("row = " + new String(r.getRow()));
@@ -116,7 +119,8 @@ public class DemoClient {
 				System.out.println("qualifier = "
 						+ new String(resultColumnValue.getQualifier()));
 				System.out.println("value = "
-						+ new String(resultColumnValue.getValue()));
+						+ unicodeToUtf8(Bytes.toString(resultColumnValue.getValue())));
+				// + new String(resultColumnValue.getValue()));
 				System.out.println("timestamp = "
 						+ resultColumnValue.getTimestamp());
 			}
@@ -124,4 +128,102 @@ public class DemoClient {
 
 		transport.close();
 	}
+
+	/**
+	 * utf8 -> unicode
+	 * 
+	 * @param inStr
+	 * @return String
+	 */
+	public static String utf8ToUnicode(String inStr) {
+		char[] myBuffer = inStr.toCharArray();
+
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < inStr.length(); i++) {
+			UnicodeBlock ub = UnicodeBlock.of(myBuffer[i]);
+			if (ub == UnicodeBlock.BASIC_LATIN) {
+				sb.append(myBuffer[i]);
+			} else if (ub == UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
+				int j = (int) myBuffer[i] - 65248;
+				sb.append((char) j);
+			} else {
+				short s = (short) myBuffer[i];
+				String hexS = Integer.toHexString(s);
+				String unicode = "\\u" + hexS;
+				sb.append(unicode.toLowerCase());
+			}
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * unicode -> utf8
+	 * @param theString
+	 * @return String
+	 */
+	public static String unicodeToUtf8(String theString) {
+		char aChar;
+		int len = theString.length();
+		StringBuffer outBuffer = new StringBuffer(len);
+		for (int x = 0; x < len;) {
+			aChar = theString.charAt(x++);
+			if (aChar == '\\') {
+				aChar = theString.charAt(x++);
+				if (aChar == 'u') {
+					// Read the xxxx
+					int value = 0;
+					for (int i = 0; i < 4; i++) {
+						aChar = theString.charAt(x++);
+						switch (aChar) {
+						case '0':
+						case '1':
+						case '2':
+						case '3':
+						case '4':
+						case '5':
+						case '6':
+						case '7':
+						case '8':
+						case '9':
+							value = (value << 4) + aChar - '0';
+							break;
+						case 'a':
+						case 'b':
+						case 'c':
+						case 'd':
+						case 'e':
+						case 'f':
+							value = (value << 4) + 10 + aChar - 'a';
+							break;
+						case 'A':
+						case 'B':
+						case 'C':
+						case 'D':
+						case 'E':
+						case 'F':
+							value = (value << 4) + 10 + aChar - 'A';
+							break;
+						default:
+							throw new IllegalArgumentException(
+									"Malformed   \\uxxxx   encoding.");
+						}
+					}
+					outBuffer.append((char) value);
+				} else {
+					if (aChar == 't')
+						aChar = '\t';
+					else if (aChar == 'r')
+						aChar = '\r';
+					else if (aChar == 'n')
+						aChar = '\n';
+					else if (aChar == 'f')
+						aChar = '\f';
+					outBuffer.append(aChar);
+				}
+			} else
+				outBuffer.append(aChar);
+		}
+		return outBuffer.toString();
+	}
+
 }
