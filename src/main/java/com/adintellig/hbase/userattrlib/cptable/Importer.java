@@ -20,6 +20,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.adintellig.util.UnicodeTransverter;
+
 public class Importer extends TableMapper<Writable, Writable> {
 
 	private byte[] columnFamily;
@@ -153,6 +155,7 @@ public class Importer extends TableMapper<Writable, Writable> {
 						video.setVtitle(name);
 
 						String putValue = mapper.writeValueAsString(vv);
+						putValue = UnicodeTransverter.utf8ToUnicode(putValue);
 
 						if (put == null) {
 							put = new Put(row.get());

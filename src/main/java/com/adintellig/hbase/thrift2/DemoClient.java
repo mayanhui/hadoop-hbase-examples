@@ -26,7 +26,10 @@ public class DemoClient {
 			TIllegalArgument {
 		System.out.println("Thrift2 Demo");
 
-		String host = "192.168.1.115";
+		String host = "222.173.25.115";
+		// host = "222.173.25.101";
+		// host = "114.112.82.24";
+		
 		int port = 9090;
 		int timeout = 10000;
 		boolean framed = false;
@@ -43,10 +46,10 @@ public class DemoClient {
 		transport.open();
 
 		String tableName = "user_behavior_attribute_noregistered";
-		// tableName = "user_behavior_attribute";
+		tableName = "user_behavior_attribute";
 		// tableName = "user_test";
 		String rowkey = "{663FCA96-B865-8AB8-A416-9BBFB5F983CB}";
-		// rowkey = "13122609814632914";
+		 rowkey = "13122609814632914";
 		// rowkey = "Log_EXPRESS";
 		String columnFamily = "bhvr";
 
@@ -102,7 +105,7 @@ public class DemoClient {
 		// filter
 		/* a. 找到以"FAV_"开头的所有列 */
 		String filterString = "QualifierFilter(=,'regexstring:^FAV_.*')";
-		filterString = "QualifierFilter(=,'regexstring:^M_.*')";
+//		filterString = "QualifierFilter(=,'regexstring:^M_.*')";
 		/* b. 找到字段"FAV_42666" */
 		// String filterString = "QualifierFilter(=,'binary:FAV_42666')";
 		scan.setFilterString(filterString.getBytes());

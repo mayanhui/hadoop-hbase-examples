@@ -33,14 +33,14 @@ import org.apache.thrift.transport.TTransportException;
 public class EasyDemoClient {
 
 	static protected int port = 9090;
-	static protected String host = "114.112.82.61";
+	static protected String host = "114.112.82.20";
 	CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
 
 	ByteBuffer table = ByteBuffer
-			.wrap(bytes("user_behavior_attribute_noregistered_index"));
+			.wrap(bytes("user_behavior_attribute_noregistered"));
 	// ByteBuffer table = ByteBuffer.wrap(bytes("demo_table"));
-//	ByteBuffer columns = ByteBuffer.wrap(bytes("attr:adid"));
-	ByteBuffer columns = ByteBuffer.wrap(bytes("cf1:rk"));
+	ByteBuffer columns = ByteBuffer.wrap(bytes("attr:adid"));
+//	ByteBuffer columns = ByteBuffer.wrap(bytes("cf1:rk"));
 //	ByteBuffer row = ByteBuffer
 //			.wrap(bytes("{F2DE8721-B4B6-5B87-E4CB-90FA4F0CA0B8}"));
 	ByteBuffer row = ByteBuffer
