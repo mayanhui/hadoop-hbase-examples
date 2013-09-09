@@ -11,3 +11,10 @@ command:
 
 #生成最后推荐结果
 /opt/modules/hadoop/hadoop-1.0.3/bin/hadoop jar /opt/hadoopbusiness/ComETL2/mapred/hbase-bulk-import-0.1.jar com.baofeng.hbase.ads.recom.Main -i user_behavior_attribute_noregistered -c attr:adtagid -o /data/dw/attribute_ads/uid_adids -m /data/dw/attribute_ads/adid_tagid_mapping_online || -input /tmp/test -output /data/dw/attribute_ads/uid_adids
+
+
+#Load attr_gender to redis
+/opt/modules/hadoop/hadoop-1.0.3/bin/hadoop jar  /opt/hadoopbusiness/ComETL2/mapred/hadoop-hbase-application-0.1.jar com.baofeng.hbase.ads.user.Main -i user_behavior_attribute_noregistered -f attr_gender -c attr:gender
+
+#Load attr_age to redis
+/opt/modules/hadoop/hadoop-1.0.3/bin/hadoop jar  /opt/hadoopbusiness/ComETL2/mapred/hadoop-hbase-application-0.1.jar com.baofeng.hbase.ads.user.Main -i user_behavior_attribute_noregistered -f attr_age -c attr:age
