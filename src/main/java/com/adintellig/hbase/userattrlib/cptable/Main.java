@@ -8,6 +8,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.mapreduce.Job;
 
 import com.adintellig.util.ConfigFactory;
@@ -19,7 +20,7 @@ public class Main {
 
 	public static final String NAME = "User Attribute Lib";
 	public static String inputTable = "user_behavior_attribute_noregistered";
-	public static String outputTable = "user_test";
+	public static String outputTable = "user_behavior_attribute_noregistered";
 	public static String mapping = "/tmp/movieid-mapping.csv";
 
 	static ConfigProperties config = ConfigFactory.getInstance()
@@ -32,6 +33,7 @@ public class Main {
 		scan.setBatch(200);
 		scan.setCaching(100);
 		scan.setMaxVersions();
+		scan.addColumn(Bytes.toBytes("bhvr"), Bytes.toBytes("vvmid"));
 
 		// hbase master
 		conf.set(ConfigProperties.CONFIG_NAME_HBASE_MASTER,

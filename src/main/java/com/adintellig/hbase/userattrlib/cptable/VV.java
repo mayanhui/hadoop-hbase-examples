@@ -10,8 +10,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class VV {
 	private String vid = "";
 	private String aid = "";
+	private String uid = "";
 	private long time;
-	private long timecount;
+	private String ver = "";
+	private long timecount = 300;
 	private Video video = new Video();
 
 	public String getVid() {
@@ -53,6 +55,22 @@ public class VV {
 	public void setVideo(Video video) {
 		this.video = video;
 	}
+	
+	public String getUid() {
+		return uid;
+	}
+
+	public void setUid(String uid) {
+		this.uid = uid;
+	}
+	
+	public String getVer() {
+		return ver;
+	}
+
+	public void setVer(String ver) {
+		this.ver = ver;
+	}
 
 	public static void main(String[] args) throws JsonGenerationException,
 			JsonMappingException, IOException {
@@ -71,32 +89,38 @@ public class VV {
 //			video.setVtitle("NAME-NAME");
 
 			String json = mapper.writeValueAsString(vv);
+			System.out.println(json);
 			json = utf8ToUnicode(json);
 			System.out.println(json);
 			
-			System.out.println(unicodeToUtf8("\u57A0"));
+			System.out.println(unicodeToUtf8("\\\\x5Cu519b\\\\x5Cu523a"));
 		}
+		
 		long en = System.currentTimeMillis();
 		System.out.println(en - st);
 
-		for (int i = 0; i < 1000; i++) {
-			String aid = "123123";
-			long ts = 137000125688L;
-			String title = "NAME-NAME";
-			String mid = "MID123";
-			String wid = "WID34";
-			String json = "{\"vid\":\"\",\"aid\":\""
-					+ aid
-					+ "\",\"time\":"
-					+ ts
-					+ ",\"timecount\":0,\"video\":{\"channel\":\"\",\"vid\":\"\",\"aid\":\""
-					+ aid + "\",\"vtitle\":\"" + title + "\",\"wid\":\"" + wid
-					+ "\",\"pid\":\"\",\"movieid\":\"" + mid + "\"}}";
-
-			// System.out.println(json);
-		}
-		long en2 = System.currentTimeMillis();
-		System.out.println(en2 - en);
+//		for (int i = 0; i < 1000; i++) {
+//			String aid = "123123";
+//			long ts = 137000125688L;
+//			String title = "NAME-NAME";
+//			String mid = "MID123";
+//			String wid = "WID34";
+//			String json = "{\"vid\":\"\",\"aid\":\""
+//					+ aid
+//					+ "\",\"time\":"
+//					+ ts
+//					+ ",\"timecount\":0,\"video\":{\"channel\":\"\",\"vid\":\"\",\"aid\":\""
+//					+ aid + "\",\"vtitle\":\"" + title + "\",\"wid\":\"" + wid
+//					+ "\",\"pid\":\"\",\"movieid\":\"" + mid + "\"}}";
+//
+//			// System.out.println(json);
+//		}
+//		long en2 = System.currentTimeMillis();
+//		System.out.println(en2 - en);
+		
+//		String line = "\\\\x5Cu670b\\\\x5Cu53cb\\\\x5Cu4e5f\\\\x5Cu4e0a\\\\x5Cu5e8a: \\\\x5Cu7b2c1\\\\x5Cu5b63";
+//		line = unicodeToUtf8(line);
+//		System.out.println(line);
 	}
 	
 	/**

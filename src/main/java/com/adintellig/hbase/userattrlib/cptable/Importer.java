@@ -10,7 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.Delete;
+//import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
@@ -146,8 +146,9 @@ public class Importer extends TableMapper<Writable, Writable> {
 								+ "_" + aid + "_" + typeID;
 
 						VV vv = new VV();
-						vv.setTime(timestamp);
+						vv.setTime(timestamp/1000);
 						vv.setAid(aid);
+						vv.setUid(Bytes.toString(row.get()));
 						Video video = vv.getVideo();
 						video.setAid(aid);
 						video.setMovieid(mid);
@@ -155,8 +156,11 @@ public class Importer extends TableMapper<Writable, Writable> {
 						video.setVtitle(name);
 
 						String putValue = mapper.writeValueAsString(vv);
-						putValue = UnicodeTransverter.utf8ToUnicode(putValue);
-
+						System.out.println(putValue);
+//						putValue = UnicodeTransverter.utf8ToUnicode(putValue);
+						String temp = UnicodeTransverter.utf8ToUnicode(putValue);
+						System.out.println(temp);
+						
 						if (put == null) {
 							put = new Put(row.get());
 						}

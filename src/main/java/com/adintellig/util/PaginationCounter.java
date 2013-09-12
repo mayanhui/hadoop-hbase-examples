@@ -17,6 +17,9 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.PageFilter;
+import org.apache.hadoop.hbase.filter.QualifierFilter;
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
+import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class PaginationCounter {
@@ -158,7 +161,9 @@ public class PaginationCounter {
 	public void pageRow(int pageSize, byte[] lastRow) throws IOException {
 		long st = System.currentTimeMillis();
 
-		Filter filter = new PageFilter(pageSize);
+//		Filter filter = new PageFilter(pageSize);
+		Filter filter = new QualifierFilter(CompareOp.EQUAL,new RegexStringComparator("^M_.*"));
+		
 		int totalRows = 0;
 
 		Scan scan = new Scan();

@@ -198,7 +198,6 @@ public class DemoClient {
         mutations.add(new Mutation(false, ByteBuffer.wrap(bytes("entry:foo")), ByteBuffer.wrap(invalid), false));
         client.mutateRow(ByteBuffer.wrap(t), ByteBuffer.wrap(invalid), mutations, null);
 
-
         // Run a scanner on the rows we just created
         ArrayList<ByteBuffer> columnNames = new ArrayList<ByteBuffer>();
         columnNames.add(ByteBuffer.wrap(bytes("entry:")));

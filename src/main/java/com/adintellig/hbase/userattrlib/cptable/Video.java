@@ -8,6 +8,7 @@ public class Video {
 	private String pid = "";
 	private String channel = "";
 	private String movieid = "";
+	private String location = "0";
 
 	public String getVtitle() {
 		return vtitle;
@@ -65,4 +66,12 @@ public class Video {
 		this.movieid = movieid;
 	}
 
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+	
 }
