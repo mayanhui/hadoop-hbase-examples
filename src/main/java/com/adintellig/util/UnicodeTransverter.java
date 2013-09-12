@@ -108,8 +108,8 @@ public class UnicodeTransverter {
 				int j = (int) myBuffer[i] - 65248;
 				sb.append((char) j);
 			} else {
-				short s = (short) myBuffer[i];
-				String hexS = Integer.toHexString(s);
+//				short s = (short) myBuffer[i];
+				String hexS = Integer.toHexString(myBuffer[i]);
 				String unicode = "\\u" + hexS;
 				sb.append(unicode.toLowerCase());
 			}

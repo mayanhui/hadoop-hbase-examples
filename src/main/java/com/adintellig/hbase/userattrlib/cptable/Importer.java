@@ -156,10 +156,7 @@ public class Importer extends TableMapper<Writable, Writable> {
 						video.setVtitle(name);
 
 						String putValue = mapper.writeValueAsString(vv);
-						System.out.println(putValue);
-//						putValue = UnicodeTransverter.utf8ToUnicode(putValue);
-						String temp = UnicodeTransverter.utf8ToUnicode(putValue);
-						System.out.println(temp);
+						putValue = UnicodeTransverter.utf8ToUnicode(putValue);
 						
 						if (put == null) {
 							put = new Put(row.get());
