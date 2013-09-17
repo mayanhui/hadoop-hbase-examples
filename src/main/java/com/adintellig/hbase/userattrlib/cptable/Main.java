@@ -30,9 +30,10 @@ public class Main {
 		Configuration conf = HBaseConfiguration.create();
 
 		Scan scan = new Scan();
-		scan.setBatch(200);
-		scan.setCaching(100);
-		scan.setMaxVersions();
+		scan.setBatch(100);
+		scan.setCaching(10);
+//		scan.setTimeRange(System.currentTimeMillis() - 3 * 30 * 24 * 3600L, System.currentTimeMillis());
+		scan.setMaxVersions(200);
 		scan.addColumn(Bytes.toBytes("bhvr"), Bytes.toBytes("vvmid"));
 
 		// hbase master
@@ -46,6 +47,8 @@ public class Main {
 		// set hadoop speculative execution to false
 		conf.setBoolean(Const.HADOOP_MAP_SPECULATIVE_EXECUTION, false);
 		conf.setBoolean(Const.HADOOP_REDUCE_SPECULATIVE_EXECUTION, false);
+		
+//		conf.set("mapred.job.queue.name", "ETL");
 
 		Job job = new Job(conf, NAME + ": Copy " + inputTable + " to "
 				+ outputTable);
