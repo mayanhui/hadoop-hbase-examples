@@ -10,6 +10,7 @@ import org.apache.hadoop.hbase.thrift2.generated.TColumnValue;
 import org.apache.hadoop.hbase.thrift2.generated.THBaseService;
 import org.apache.hadoop.hbase.thrift2.generated.TIOError;
 import org.apache.hadoop.hbase.thrift2.generated.TIllegalArgument;
+import org.apache.hadoop.hbase.thrift2.generated.TPut;
 import org.apache.hadoop.hbase.thrift2.generated.TResult;
 import org.apache.hadoop.hbase.thrift2.generated.TScan;
 import org.apache.hadoop.hbase.thrift2.generated.TTimeRange;
@@ -130,6 +131,38 @@ public class DemoClient {
 		}
 
 		transport.close();
+		
+		
+		//multiple put
+		List<TPut> puts = new ArrayList<TPut>();
+		TPut put = new TPut();
+		put.setRow("row1".getBytes());
+
+		TColumnValue columnValue = new TColumnValue();
+		columnValue.setFamily("family1".getBytes());
+		columnValue.setQualifier("qualifier1".getBytes());
+		columnValue.setValue("value1".getBytes());
+		columnValue.setTimestamp(137090805234L);
+		List<TColumnValue> columnValues = new ArrayList<TColumnValue>();
+		columnValues.add(columnValue);
+		put.setColumnValues(columnValues);
+		
+		puts.add(put);
+		
+		TPut put2 = new TPut();
+		put2.setRow("row2".getBytes());
+
+		TColumnValue columnValue2 = new TColumnValue();
+		columnValue2.setFamily("family2".getBytes());
+		columnValue2.setQualifier("qualifier2".getBytes());
+		columnValue2.setValue("value2".getBytes());
+		columnValue2.setTimestamp(13712312312343L);
+		List<TColumnValue> columnValues2 = new ArrayList<TColumnValue>();
+		columnValues2.add(columnValue2);
+		put2.setColumnValues(columnValues2);
+		
+		puts.add(put2);
+		client.putMultiple(table, puts);
 	}
 
 	/**
